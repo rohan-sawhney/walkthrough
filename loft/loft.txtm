@@ -1,0 +1,126 @@
+n default
+d 255 255 255 
+a 255
+n Color_000
+d 255 255 255 
+a 255
+n [Stone_Vein_Gray]2
+d 255 255 255 [Stone_Vein_Gray]2.jpg
+a 255
+n _7
+d 255 255 255 _7.jpg
+a 255
+n Wood_Floor_Light
+d 255 255 255 Wood_Floor_Light.jpg
+a 255
+n [Wood_Cherry_Original]2
+d 255 255 255 [Wood_Cherry_Original]2.jpg
+a 255
+n Color_H19
+d 61 102 102 
+a 73.95
+n Color_008
+d 30 30 30 
+a 255
+n Brick_Antique
+d 255 255 255 Brick_Antique.jpg
+a 255
+n Color_009
+d 0 0 0 
+a 255
+n Color_C02
+d 255 153 50 
+a 255
+n Color_H11
+d 0 153 153 
+a 255
+n Color_F02
+d 153 255 50 
+a 255
+n Material_#2
+d 72 89 41 
+a 255
+n Babylon_pa.1
+d 128 118 102 
+a 255
+n Kashpo_Metal1
+d 47 47 47 
+a 255
+n Material_#1
+d 127 127 127 
+a 255
+n Color_005
+d 114 114 114 
+a 255
+n Color_B01
+d 255 63 0 
+a 255
+n Color_B02
+d 255 101 50 
+a 255
+n Color_C04
+d 255 204 153 
+a 255
+n Color_B06
+d 204 51 0 
+a 255
+n Color_B19
+d 102 71 61 
+a 255
+n Color_B21
+d 51 12 0 
+a 255
+n Color_B25
+d 51 43 40 
+a 255
+n Color_B17
+d 102 40 20 
+a 255
+n _26
+d 255 255 255 _26.jpg
+a 255
+n [Metal_Aluminum_Anodized]2
+d 255 255 255 [Metal_Aluminum_Anodized]2.jpg
+a 255
+n Color_B11
+d 255 255 255 Color_B11.jpg
+a 255
+n _9
+d 255 255 255 _9.jpg
+a 255
+n Herbe_socle
+d 255 255 255 Herbe_socle.jpg
+a 255
+n Groundcover_RiverRock_4inch
+d 255 255 255 Groundcover_RiverRock_4inch.jpg
+a 255
+n [Water_Pool]1
+d 255 255 255 [Water_Pool]1.jpg
+a 183.6
+n Stone_Pavers_Flagstone_Gray
+d 255 255 255 Stone_Pavers_Flagstone_Gray.jpg
+a 255
+n Color_A16
+d 102 0 0 
+a 255
+n _1
+d 255 255 255 _1.jpg
+a 255
+n SydSst11arot
+d 255 255 255 SydSst11arot.jpg
+a 255
+n Color_C06
+d 204 102 0 
+a 255
+n Color_C11
+d 153 76 0 
+a 255
+n _2
+d 255 255 255 _2.jpg
+a 255
+n _5
+d 255 255 255 _5.jpg
+a 255
+n Blinds_Weave
+d 255 255 255 Blinds_Weave.jpg
+a 255
