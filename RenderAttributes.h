@@ -4,6 +4,7 @@
 #include "Types.h"
 #include "Material.h"
 #include "Shader.h"
+#include "BoundingBox.h"
 
 struct RenderVertex {
     Eigen::Vector3f position;
@@ -50,6 +51,7 @@ public:
     std::vector<GLuint> indices;
     const Material& material;
     const RenderTexture& renderTexture;
+    BoundingBox boundingBox;
     
 private:
     // member variables
@@ -57,6 +59,15 @@ private:
     GLuint vbo;
     GLuint instanceVbo;
     GLuint ebo;
+    /*
+    GLuint vbo;
+    GLuint ebo;
+    GLuint cullVao;
+    GLuint drawVao;
+    GLuint cullTbo;
+    GLuint drawTbo;
+    GLuint cullQuery;
+    */
 };
 
 #endif

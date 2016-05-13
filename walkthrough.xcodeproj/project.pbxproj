@@ -15,14 +15,12 @@
 		324879161CE50454000A11D8 /* Mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 324878FB1CE50454000A11D8 /* Mesh.cpp */; };
 		324879171CE50454000A11D8 /* RenderAttributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 324878FD1CE50454000A11D8 /* RenderAttributes.cpp */; };
 		324879181CE50454000A11D8 /* Instance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 324878FF1CE50454000A11D8 /* Instance.cpp */; };
-		324879191CE50454000A11D8 /* WorldMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 324879011CE50454000A11D8 /* WorldMesh.cpp */; };
 		3248791A1CE50454000A11D8 /* Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 324879031CE50454000A11D8 /* Material.cpp */; };
 		3248791B1CE50454000A11D8 /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 324879051CE50454000A11D8 /* Texture.cpp */; };
 		3248791C1CE50454000A11D8 /* MeshIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 324879071CE50454000A11D8 /* MeshIO.cpp */; };
 		3248791D1CE50454000A11D8 /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 324879091CE50454000A11D8 /* Model.cpp */; };
 		3248791E1CE50454000A11D8 /* Skybox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3248790B1CE50454000A11D8 /* Skybox.cpp */; };
 		3248791F1CE50454000A11D8 /* BoundingBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3248790D1CE50454000A11D8 /* BoundingBox.cpp */; };
-		324879201CE50454000A11D8 /* Bvh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3248790F1CE50454000A11D8 /* Bvh.cpp */; };
 		324879221CE5045E000A11D8 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 324879211CE5045E000A11D8 /* OpenGL.framework */; };
 		324879241CE50464000A11D8 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 324879231CE50464000A11D8 /* GLUT.framework */; };
 /* End PBXBuildFile section */
@@ -57,8 +55,6 @@
 		324878FE1CE50454000A11D8 /* RenderAttributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RenderAttributes.h; sourceTree = "<group>"; };
 		324878FF1CE50454000A11D8 /* Instance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Instance.cpp; sourceTree = "<group>"; };
 		324879001CE50454000A11D8 /* Instance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Instance.h; sourceTree = "<group>"; };
-		324879011CE50454000A11D8 /* WorldMesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WorldMesh.cpp; sourceTree = "<group>"; };
-		324879021CE50454000A11D8 /* WorldMesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WorldMesh.h; sourceTree = "<group>"; };
 		324879031CE50454000A11D8 /* Material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Material.cpp; sourceTree = "<group>"; };
 		324879041CE50454000A11D8 /* Material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Material.h; sourceTree = "<group>"; };
 		324879051CE50454000A11D8 /* Texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Texture.cpp; sourceTree = "<group>"; };
@@ -71,8 +67,6 @@
 		3248790C1CE50454000A11D8 /* Skybox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Skybox.h; sourceTree = "<group>"; };
 		3248790D1CE50454000A11D8 /* BoundingBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BoundingBox.cpp; sourceTree = "<group>"; };
 		3248790E1CE50454000A11D8 /* BoundingBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BoundingBox.h; sourceTree = "<group>"; };
-		3248790F1CE50454000A11D8 /* Bvh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Bvh.cpp; sourceTree = "<group>"; };
-		324879101CE50454000A11D8 /* Bvh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bvh.h; sourceTree = "<group>"; };
 		324879211CE5045E000A11D8 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		324879231CE50464000A11D8 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -111,8 +105,6 @@
 				324878FE1CE50454000A11D8 /* RenderAttributes.h */,
 				324878FF1CE50454000A11D8 /* Instance.cpp */,
 				324879001CE50454000A11D8 /* Instance.h */,
-				324879011CE50454000A11D8 /* WorldMesh.cpp */,
-				324879021CE50454000A11D8 /* WorldMesh.h */,
 				324879031CE50454000A11D8 /* Material.cpp */,
 				324879041CE50454000A11D8 /* Material.h */,
 				324879051CE50454000A11D8 /* Texture.cpp */,
@@ -125,8 +117,6 @@
 				3248790C1CE50454000A11D8 /* Skybox.h */,
 				3248790D1CE50454000A11D8 /* BoundingBox.cpp */,
 				3248790E1CE50454000A11D8 /* BoundingBox.h */,
-				3248790F1CE50454000A11D8 /* Bvh.cpp */,
-				324879101CE50454000A11D8 /* Bvh.h */,
 				324878E81CE5042B000A11D8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -203,13 +193,11 @@
 				3248791C1CE50454000A11D8 /* MeshIO.cpp in Sources */,
 				324879131CE50454000A11D8 /* Camera.cpp in Sources */,
 				324879171CE50454000A11D8 /* RenderAttributes.cpp in Sources */,
-				324879201CE50454000A11D8 /* Bvh.cpp in Sources */,
 				324879111CE50454000A11D8 /* main.cpp in Sources */,
 				3248791F1CE50454000A11D8 /* BoundingBox.cpp in Sources */,
 				3248791E1CE50454000A11D8 /* Skybox.cpp in Sources */,
 				324879151CE50454000A11D8 /* Face.cpp in Sources */,
 				3248791A1CE50454000A11D8 /* Material.cpp in Sources */,
-				324879191CE50454000A11D8 /* WorldMesh.cpp in Sources */,
 				3248791B1CE50454000A11D8 /* Texture.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -389,6 +377,7 @@
 				324878F01CE5042B000A11D8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

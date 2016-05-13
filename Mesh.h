@@ -6,7 +6,6 @@
 #include "Face.h"
 #include "Texture.h"
 #include "RenderAttributes.h"
-#include "BoundingBox.h"
 
 class Mesh {
 public:
@@ -15,7 +14,10 @@ public:
     
     // assignment operator
     Mesh& operator=(const Mesh& mesh);
-        
+    
+    // returns cm
+    Eigen::Vector3f cm(const Eigen::Matrix4f& transform) const;
+    
     // set up
     void setup(const std::vector<Material>& materials, const std::vector<Texture>& textures,
                const std::vector<Eigen::Matrix4f>& transforms);

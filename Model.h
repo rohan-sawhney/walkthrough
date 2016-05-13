@@ -3,8 +3,6 @@
 
 #include "Types.h"
 #include "Instance.h"
-#include "WorldMesh.h"
-#include "Bvh.h"
 
 class Model {
 public:
@@ -30,9 +28,6 @@ private:
     // separates transparent instances
     void separateTransparentInstances();
     
-    // create world meshes
-    void createWorldMeshes();
-    
     // center model
     void centerModel();
     
@@ -41,10 +36,8 @@ private:
     
     // member variables
     std::vector<Instance> instances;
-    std::vector<WorldMesh> worldMeshes;
     std::vector<Material> materials;
     std::vector<Texture> textures;
-    Bvh bvh;
 };
 
 #endif

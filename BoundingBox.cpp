@@ -1,5 +1,4 @@
 #include "BoundingBox.h"
-#include "Face.h"
 
 BoundingBox::BoundingBox():
 min(Eigen::Vector3f::Zero()),

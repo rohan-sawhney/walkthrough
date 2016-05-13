@@ -24,61 +24,55 @@ bool readShaderCode(const std::string& path, std::string& code)
     return true;
 }
 
-void Shader::setup(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath)
+GLuint compileShader(const std::string& path, GLenum type)
 {
-    std::string vertexCode, fragmentCode, geometryCode;
+    GLint success;
+    GLchar infoLog[512];
+    std::string code;
+    GLuint shader = 0;
     
-    if (readShaderCode(vertexPath, vertexCode) && readShaderCode(fragmentPath, fragmentCode)) {
-        
-        GLint success;
-        GLchar infoLog[512];
-        
-        // compile vertex shader
-        const GLchar *vShaderCode = vertexCode.c_str();
-        vertex = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertex, 1, &vShaderCode, NULL);
-        glCompileShader(vertex);
-        glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
+    if (readShaderCode(path, code)) {
+        const GLchar *shaderCode = code.c_str();
+        shader = glCreateShader(type);
+        glShaderSource(shader, 1, &shaderCode, NULL);
+        glCompileShader(shader);
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if (!success) {
-            glGetShaderInfoLog(vertex, 512, NULL, infoLog);
+            glGetShaderInfoLog(shader, 512, NULL, infoLog);
             std::cout << "Error: " << infoLog << std::endl;
+            shader = 0;
         }
-        
-        // compile fragment shader
-        const GLchar *fShaderCode = fragmentCode.c_str();
-        fragment = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment, 1, &fShaderCode, NULL);
-        glCompileShader(fragment);
-        glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
-        if (!success) {
-            glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-            std::cout << "Error: " << infoLog << std::endl;
-        }
-        
-        if (readShaderCode(geometryPath, geometryCode)) {
-            // compile fragment shader
-            const GLchar *gShaderCode = geometryCode.c_str();
-            geometry = glCreateShader(GL_GEOMETRY_SHADER);
-            glShaderSource(geometry, 1, &gShaderCode, NULL);
-            glCompileShader(geometry);
-            glGetShaderiv(geometry, GL_COMPILE_STATUS, &success);
-            if (!success) {
-                glGetShaderInfoLog(geometry, 512, NULL, infoLog);
-                std::cout << "Error: " << infoLog << std::endl;
-            }
-        }
-        
-        // compile shader program
-        program = glCreateProgram();
-        glAttachShader(program, vertex);
-        glAttachShader(program, fragment);
-        if (!geometryPath.empty()) glAttachShader(program, geometry);
-        glLinkProgram(program);
-        glGetProgramiv(program, GL_LINK_STATUS, &success);
-        if (!success) {
-            glGetProgramInfoLog(program, 512, NULL, infoLog);
-            std::cout << "Error: " << infoLog << std::endl;
-        }
+    }
+    
+    return shader;
+}
+
+void Shader::setup(const std::string& vertexPath,
+                   const std::string& geometryPath,
+                   const std::string& fragmentPath)
+{
+    // compile shaders
+    vertex = compileShader(vertexPath, GL_VERTEX_SHADER);
+    geometry = compileShader(geometryPath, GL_GEOMETRY_SHADER);
+    fragment = compileShader(fragmentPath, GL_FRAGMENT_SHADER);
+
+    // create program and attach shaders
+    program = glCreateProgram();
+    if (vertex) glAttachShader(program, vertex);
+    if (geometry) glAttachShader(program, geometry);
+    if (fragment) glAttachShader(program, fragment);
+}
+
+void Shader::link()
+{
+    GLint success;
+    GLchar infoLog[512];
+    
+    glLinkProgram(program);
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(program, 512, NULL, infoLog);
+        std::cout << "Error: " << infoLog << std::endl;
     }
 }
 

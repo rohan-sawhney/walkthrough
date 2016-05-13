@@ -18,6 +18,19 @@ Mesh& Mesh::operator=(const Mesh& mesh)
     return *this;
 }
 
+Eigen::Vector3f Mesh::cm(const Eigen::Matrix4f& transform) const
+{
+    Eigen::Vector3f cm = Eigen::Vector3f::Zero();
+    for (VertexCIter v = vertices.begin(); v != vertices.end(); v++) {
+        Eigen::Vector3f position = transform.block(0, 0, 3, 3) * v->position +
+                                   transform.block(0, 3, 3, 1);
+        cm += position;
+    }
+    cm /= (float)vertices.size();
+    
+    return cm;
+}
+
 void Mesh::setup(const std::vector<Material>& materials, const std::vector<Texture>& textures,
                  const std::vector<Eigen::Matrix4f>& transforms)
 {
@@ -49,6 +62,7 @@ void Mesh::setup(const std::vector<Material>& materials, const std::vector<Textu
                 renderVertex.normal = normals[vIndex];
                 renderVertex.uv = uvs[vIndex];
                 renderMeshes[index].vertices.push_back(renderVertex);
+                renderMeshes[index].boundingBox.expandToInclude(renderVertex.position);
             }
             
             renderMeshes[index].indices.push_back((GLuint)vertexMap[index][vIndex]);

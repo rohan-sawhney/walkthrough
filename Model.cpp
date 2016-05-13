@@ -82,28 +82,26 @@ void Model::separateTransparentInstances()
     }
 }
 
-void Model::createWorldMeshes()
-{
-    for (size_t i = 0; i < instances.size(); i++) {
-        for (size_t j = 0; j < instances[i].transforms.size(); j++) {
-            worldMeshes.push_back(WorldMesh(&instances[i].mesh, &instances[i].transforms[j]));
-        }
-    }
-}
+
 
 void Model::centerModel()
 {
     // compute center of mass
+    int totalMeshes = 0;
     Eigen::Vector3f cm = Eigen::Vector3f::Zero();
-    for (size_t i = 0; i < worldMeshes.size(); i++) {
-        worldMeshes[i].computeFeatures();
-        cm += worldMeshes[i].cm;
+    for (size_t i = 0; i < instances.size(); i++) {
+        for (size_t j = 0; j < instances[i].transforms.size(); j++) {
+            cm += instances[i].mesh.cm(instances[i].transforms[j]);
+            totalMeshes++;
+        }
     }
-    cm /= (float)worldMeshes.size();
+    cm /= (float)totalMeshes;
     
-    // center mesh transforms around origin
-    for (size_t i = 0; i < worldMeshes.size(); i++) {
-        worldMeshes[i].shift(-cm);
+    // center instance transforms around origin
+    for (size_t i = 0; i < instances.size(); i++) {
+        for (size_t j = 0; j < instances[i].transforms.size(); j++) {
+            instances[i].transforms[j].block(0, 3, 3, 1) -= cm;
+        }
     }
 }
 
@@ -111,9 +109,7 @@ void Model::setupInstances()
 {
     createMirroredInstances();
     separateTransparentInstances();
-    createWorldMeshes();
     centerModel();
-    bvh.build(&worldMeshes);
     
     for (size_t i = 0; i < instances.size(); i++) {
         if (instances[i].transforms[0].determinant() < 0) instances[i].mesh.flipOrientation();
@@ -134,7 +130,6 @@ void Model::reset()
     }
     
     // clear
-    worldMeshes.clear();
     instances.clear();
     materials.clear();
     textures.clear();

@@ -9,8 +9,12 @@ public:
     Shader();
     
     // set up
-    void setup(const std::string& vertexPath, const std::string& fragmentPath,
-               const std::string& geometryPath = "");
+    void setup(const std::string& vertexPath,
+               const std::string& geometryPath,
+               const std::string& fragmentPath);
+    
+    // link
+    void link();
     
     // use
     void use();

@@ -30,7 +30,6 @@ class Material;
 class Texture;
 class Mesh;
 class Instance;
-class WorldMesh;
 class Model;
 class SkyBox;
 class MeshIO;

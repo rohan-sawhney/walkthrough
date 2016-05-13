@@ -286,12 +286,12 @@ int main(int argc, char** argv)
     // TODO: lods
     // TODO: weighted average transparency
     // TODO: shadows
+    // TODO: ssao
     // TODO: normal mapping
     // TODO: parallex mapping
     // TODO: hdr
     // TODO: bloom
     // TODO: deferred shading
-    // TODO: ssao
     
     InitializeMagick(*argv);
     glutInit(&argc, argv);
@@ -305,10 +305,10 @@ int main(int argc, char** argv)
     init();
     printInstructions();
     
-    modelShader.setup(modelVert, modelFrag);
-    normalShader.setup(normalVert, normalFrag, normalGeom);
-    wireframeShader.setup(wireframeVert, wireframeFrag, wireframeGeom);
-    skyboxShader.setup(skyboxVert, skyboxFrag);
+    modelShader.setup(modelVert, "", modelFrag); modelShader.link();
+    normalShader.setup(normalVert, normalGeom, normalFrag); normalShader.link();
+    wireframeShader.setup(wireframeVert, wireframeGeom, wireframeFrag); wireframeShader.link();
+    skyboxShader.setup(skyboxVert, "", skyboxFrag); skyboxShader.link();
     setUniformBlocks();
     
     skybox.load(skyboxPath);
