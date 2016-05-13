@@ -62,11 +62,11 @@ private:
     /*
     GLuint vbo;
     GLuint ebo;
-    GLuint cullVao;
-    GLuint drawVao;
-    GLuint cullTbo;
-    GLuint drawTbo;
-    GLuint cullQuery;
+    GLuint vao;
+    GLuint culledVao;
+    GLuint tbo;
+    GLuint culledTbo;
+    GLuint query;
     */
 };
 
