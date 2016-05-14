@@ -16,7 +16,7 @@ public:
     Mesh& operator=(const Mesh& mesh);
     
     // returns cm
-    Eigen::Vector3f cm(const Eigen::Matrix4f& transform) const;
+    Eigen::Vector3f cm();
     
     // set up
     void setup(const std::vector<Material>& materials, const std::vector<Texture>& textures,

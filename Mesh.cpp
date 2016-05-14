@@ -18,13 +18,11 @@ Mesh& Mesh::operator=(const Mesh& mesh)
     return *this;
 }
 
-Eigen::Vector3f Mesh::cm(const Eigen::Matrix4f& transform) const
+Eigen::Vector3f Mesh::cm()
 {
     Eigen::Vector3f cm = Eigen::Vector3f::Zero();
     for (VertexCIter v = vertices.begin(); v != vertices.end(); v++) {
-        Eigen::Vector3f position = transform.block(0, 0, 3, 3) * v->position +
-                                   transform.block(0, 3, 3, 1);
-        cm += position;
+        cm += v->position;
     }
     cm /= (float)vertices.size();
     

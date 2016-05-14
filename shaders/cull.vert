@@ -1,6 +1,5 @@
 #version 400 core
-layout (location = 0) in vec4 inPosition;
-layout (location = 1) in mat4 model;
+layout (location = 0) in mat4 model;
 
 out mat4 modelMatrix;
 flat out int objectVisible;
@@ -9,6 +8,7 @@ layout (std140) uniform Transform {
     mat4 projection;
     mat4 view;
 };
+uniform vec4 position;
 uniform vec3 extent;
 
 void main(void)
@@ -21,14 +21,14 @@ void main(void)
    
     // create the bounding box of the object
     vec4 bbox[8];
-    bbox[0] = mvp * (inPosition + vec4( extent.x, extent.y, extent.z, 1.0));
-    bbox[1] = mvp * (inPosition + vec4(-extent.x, extent.y, extent.z, 1.0));
-    bbox[2] = mvp * (inPosition + vec4( extent.x,-extent.y, extent.z, 1.0));
-    bbox[3] = mvp * (inPosition + vec4(-extent.x,-extent.y, extent.z, 1.0));
-    bbox[4] = mvp * (inPosition + vec4( extent.x, extent.y,-extent.z, 1.0));
-    bbox[5] = mvp * (inPosition + vec4(-extent.x, extent.y,-extent.z, 1.0));
-    bbox[6] = mvp * (inPosition + vec4( extent.x,-extent.y,-extent.z, 1.0));
-    bbox[7] = mvp * (inPosition + vec4(-extent.x,-extent.y,-extent.z, 1.0));
+    bbox[0] = mvp * (position + vec4( extent.x, extent.y, extent.z, 1.0));
+    bbox[1] = mvp * (position + vec4(-extent.x, extent.y, extent.z, 1.0));
+    bbox[2] = mvp * (position + vec4( extent.x,-extent.y, extent.z, 1.0));
+    bbox[3] = mvp * (position + vec4(-extent.x,-extent.y, extent.z, 1.0));
+    bbox[4] = mvp * (position + vec4( extent.x, extent.y,-extent.z, 1.0));
+    bbox[5] = mvp * (position + vec4(-extent.x, extent.y,-extent.z, 1.0));
+    bbox[6] = mvp * (position + vec4( extent.x,-extent.y,-extent.z, 1.0));
+    bbox[7] = mvp * (position + vec4(-extent.x,-extent.y,-extent.z, 1.0));
    
     // check if bounding box is inside the view frustum
     int outOfBound[6] = int[6](0, 0, 0, 0, 0, 0);

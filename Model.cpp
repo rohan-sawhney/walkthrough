@@ -82,16 +82,17 @@ void Model::separateTransparentInstances()
     }
 }
 
-
-
 void Model::centerModel()
 {
     // compute center of mass
     int totalMeshes = 0;
     Eigen::Vector3f cm = Eigen::Vector3f::Zero();
     for (size_t i = 0; i < instances.size(); i++) {
+        
+        Eigen::Vector3f icm = instances[i].mesh.cm();
         for (size_t j = 0; j < instances[i].transforms.size(); j++) {
-            cm += instances[i].mesh.cm(instances[i].transforms[j]);
+            const Eigen::Matrix4f& transform(instances[i].transforms[j]);
+            cm += (transform.block(0, 0, 3, 3) * icm + transform.block(0, 3, 3, 1));
             totalMeshes++;
         }
     }
