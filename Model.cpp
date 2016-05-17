@@ -19,11 +19,10 @@ bool Model::load(const std::string& path)
     return false;
 }
 
-void Model::draw(Shader& shader) const
+void Model::draw(Shader& shader, Shader& cullShader) const
 {
-    shader.use();
     for (size_t i = 0; i < instances.size(); i++) {
-        instances[i].mesh.draw(shader, (int)instances[i].transforms.size());
+        instances[i].mesh.draw(shader, cullShader, (int)instances[i].transforms.size());
     }
 }
 

@@ -16,12 +16,14 @@ const std::string skyboxPath = "/Users/rohansawhney/Desktop/developer/C++/walkth
 const std::string shaderPath = "/Users/rohansawhney/Desktop/developer/C++/walkthrough/shaders/";
 const std::string modelVert = shaderPath + "model.vert";
 const std::string modelFrag = shaderPath + "model.frag";
+const std::string cullVert = shaderPath + "cull.vert";
+const std::string cullGeom = shaderPath + "cull.geom";
 const std::string normalVert = shaderPath + "normal.vert";
-const std::string normalFrag = shaderPath + "normal.frag";
 const std::string normalGeom = shaderPath + "normal.geom";
+const std::string normalFrag = shaderPath + "normal.frag";
 const std::string wireframeVert = shaderPath + "wireframe.vert";
-const std::string wireframeFrag = shaderPath + "wireframe.frag";
 const std::string wireframeGeom = shaderPath + "wireframe.geom";
+const std::string wireframeFrag = shaderPath + "wireframe.frag";
 const std::string skyboxVert = shaderPath + "skybox.vert";
 const std::string skyboxFrag = shaderPath + "skybox.frag";
 
@@ -34,6 +36,7 @@ Model model;
 Skybox skybox;
 
 Shader modelShader;
+Shader cullShader;
 Shader normalShader;
 Shader wireframeShader;
 Shader skyboxShader;
@@ -85,16 +88,24 @@ void printInstructions()
               << std::endl;
 }
 
+void setupTransformFeedback(const GLuint& program)
+{
+    const char *vars[] = { "modelMatrixRow1", "modelMatrixRow2", "modelMatrixRow3", "modelMatrixRow4" };
+    glTransformFeedbackVaryings(program, 4, vars, GL_INTERLEAVED_ATTRIBS);
+}
+
 void setUniformBlocks()
 {
     // 1) generate transform indices
     GLuint modelShaderIndex = glGetUniformBlockIndex(modelShader.program, "Transform");
+    GLuint cullShaderIndex = glGetUniformBlockIndex(cullShader.program, "Transform");
     GLuint normalShaderIndex = glGetUniformBlockIndex(normalShader.program, "Transform");
     GLuint wireframeShaderIndex = glGetUniformBlockIndex(wireframeShader.program, "Transform");
     GLuint skyboxShaderIndex = glGetUniformBlockIndex(skyboxShader.program, "Transform");
     
     // bind
     glUniformBlockBinding(modelShader.program, modelShaderIndex, 0);
+    glUniformBlockBinding(cullShader.program, cullShaderIndex, 0);
     glUniformBlockBinding(normalShader.program, normalShaderIndex, 0);
     glUniformBlockBinding(wireframeShader.program, wireframeShaderIndex, 0);
     glUniformBlockBinding(skyboxShader.program, skyboxShaderIndex, 0);
@@ -172,13 +183,13 @@ void display()
     if (success) {
         // draw model
         glDepthFunc(GL_LESS);
-        model.draw(modelShader);
+        model.draw(modelShader, cullShader);
         
         // draw normals
-        if (showNormals) model.draw(normalShader);
+        if (showNormals) model.draw(normalShader, cullShader);
         
         // draw wireframe
-        if (showWireframe) model.draw(wireframeShader);
+        if (showWireframe) model.draw(wireframeShader, cullShader);
     }
     
     // update title
@@ -200,6 +211,7 @@ void keyboardPressed(unsigned char key, int x0, int y0)
         model.reset();
         skybox.reset();
         modelShader.reset();
+        cullShader.reset();
         normalShader.reset();
         wireframeShader.reset();
         skyboxShader.reset();
@@ -281,7 +293,6 @@ void special(int i, int x0, int y0)
 
 int main(int argc, char** argv)
 {
-    // TODO: frustum culling
     // TODO: occlusion culling
     // TODO: lods
     // TODO: weighted average transparency
@@ -306,6 +317,7 @@ int main(int argc, char** argv)
     printInstructions();
     
     modelShader.setup(modelVert, "", modelFrag); modelShader.link();
+    cullShader.setup(cullVert, cullGeom, ""); setupTransformFeedback(cullShader.program); cullShader.link();
     normalShader.setup(normalVert, normalGeom, normalFrag); normalShader.link();
     wireframeShader.setup(wireframeVert, wireframeGeom, wireframeFrag); wireframeShader.link();
     skyboxShader.setup(skyboxVert, "", skyboxFrag); skyboxShader.link();

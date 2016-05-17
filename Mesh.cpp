@@ -59,7 +59,9 @@ void Mesh::setup(const std::vector<Material>& materials, const std::vector<Textu
                 renderVertex.position = vertices[vIndex].position;
                 renderVertex.normal = normals[vIndex];
                 renderVertex.uv = uvs[vIndex];
+                
                 renderMeshes[index].vertices.push_back(renderVertex);
+                renderMeshes[index].cm += renderVertex.position;
                 renderMeshes[index].boundingBox.expandToInclude(renderVertex.position);
             }
             
@@ -68,6 +70,7 @@ void Mesh::setup(const std::vector<Material>& materials, const std::vector<Textu
     }
     
     for (size_t i = 0; i < renderMeshes.size(); i++) {
+        renderMeshes[i].cm /= (float)renderMeshes[i].vertices.size();
         renderMeshes[i].setup(transforms);
     }
     
@@ -95,14 +98,10 @@ void Mesh::flipOrientation()
     }
 }
 
-void Mesh::draw(const Shader& shader, const int& instanceCount) const
+void Mesh::draw(Shader& shader, Shader& cullShader, const int& instanceCount) const
 {
     for (size_t i = 0; i < renderMeshes.size(); i++) {
-        const RenderMesh& renderMesh(renderMeshes[i]);
-        
-        renderMesh.initDrawing(shader, closed);
-        renderMesh.draw(instanceCount);
-        renderMesh.endDrawing();
+        renderMeshes[i].draw(shader, cullShader, instanceCount, closed);
     }
 }
 

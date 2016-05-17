@@ -41,11 +41,12 @@ void main(void)
         if (bbox[i].z < -bbox[i].w) outOfBound[5]++;
     }
 
-    objectVisible = 0;
+    bool inFrustum = true;
     for (int i = 0; i < 6; i++) {
         if (outOfBound[i] == 8) {
-            objectVisible = 1;
-            break;
+            inFrustum = false;
         }
     }
+    
+    objectVisible = inFrustum ? 1 : 0;
 }

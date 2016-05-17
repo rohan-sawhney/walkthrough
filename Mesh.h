@@ -29,7 +29,7 @@ public:
     void flipOrientation();
     
     // draw mesh
-    void draw(const Shader& shader, const int& instanceCount) const;
+    void draw(Shader& shader, Shader& cullShader, const int& instanceCount) const;
     
     // reset
     void reset();

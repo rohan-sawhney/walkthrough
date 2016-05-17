@@ -33,15 +33,9 @@ public:
     
     // set up
     void setup(const std::vector<Eigen::Matrix4f>& transforms);
-        
-    // prepare for drawing
-    void initDrawing(const Shader& shader, bool cullBackFaces) const;
-
-    // draw
-    void draw(const int& instanceCount) const;
     
-    // cleanup after drawing
-    void endDrawing() const;
+    // draw
+    void draw(Shader& shader, Shader& cullShader, const int& instanceCount, bool cullBackFaces) const;
     
     // reset
     void reset();
@@ -51,15 +45,23 @@ public:
     std::vector<GLuint> indices;
     const Material& material;
     const RenderTexture& renderTexture;
+    Eigen::Vector3f cm;
     BoundingBox boundingBox;
     
 private:
+    // setup culling
+    void setupCullingInformation(const std::vector<Eigen::Matrix4f>& transforms);
+    
+    // setup drawing
+    void setupDrawingInformation();
+    
+    // prepare for drawing
+    void setDefaultDrawSettings(const Shader& shader, bool cullBackFaces) const;
+    
+    // cleanup after drawing
+    void setDefaultDrawSettings() const;
+    
     // member variables
-    GLuint vao;
-    GLuint vbo;
-    GLuint instanceVbo;
-    GLuint ebo;
-    /*
     GLuint vbo;
     GLuint ebo;
     GLuint vao;
@@ -67,7 +69,6 @@ private:
     GLuint tbo;
     GLuint culledTbo;
     GLuint query;
-    */
 };
 
 #endif

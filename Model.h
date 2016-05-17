@@ -13,7 +13,7 @@ public:
     bool load(const std::string& path);
     
     // draw
-    void draw(Shader& shader) const;
+    void draw(Shader& shader, Shader& cullShader) const;
     
     // reset
     void reset();
