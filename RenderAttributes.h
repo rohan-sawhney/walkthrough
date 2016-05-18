@@ -45,7 +45,6 @@ public:
     std::vector<GLuint> indices;
     const Material& material;
     const RenderTexture& renderTexture;
-    Eigen::Vector3f cm;
     BoundingBox boundingBox;
     
 private:

@@ -61,7 +61,6 @@ void Mesh::setup(const std::vector<Material>& materials, const std::vector<Textu
                 renderVertex.uv = uvs[vIndex];
                 
                 renderMeshes[index].vertices.push_back(renderVertex);
-                renderMeshes[index].cm += renderVertex.position;
                 renderMeshes[index].boundingBox.expandToInclude(renderVertex.position);
             }
             
@@ -70,7 +69,6 @@ void Mesh::setup(const std::vector<Material>& materials, const std::vector<Textu
     }
     
     for (size_t i = 0; i < renderMeshes.size(); i++) {
-        renderMeshes[i].cm /= (float)renderMeshes[i].vertices.size();
         renderMeshes[i].setup(transforms);
     }
     

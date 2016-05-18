@@ -37,8 +37,7 @@ void RenderTexture::reset()
 
 RenderMesh::RenderMesh(const Material& material0, const RenderTexture& renderTexture0):
 material(material0),
-renderTexture(renderTexture0),
-cm(Eigen::Vector3f::Zero())
+renderTexture(renderTexture0)
 {
     
 }
@@ -179,9 +178,10 @@ void RenderMesh::draw(Shader& shader, Shader& cullShader, const int& instanceCou
     glEnable(GL_RASTERIZER_DISCARD);
     
     // set uniforms
-    Eigen::Vector3f extent = boundingBox.extent / 2.0;
-    glUniform4f(glGetUniformLocation(cullShader.program, "position"), cm.x(), cm.y(), cm.z(), 0.0);
-    glUniform3f(glGetUniformLocation(cullShader.program, "extent"), extent.x(), extent.y(), extent.z());
+    const Eigen::Vector3f& min(boundingBox.min);
+    const Eigen::Vector3f& max(boundingBox.max);
+    glUniform3f(glGetUniformLocation(cullShader.program, "boxMin"), min.x(), min.y(), min.z());
+    glUniform3f(glGetUniformLocation(cullShader.program, "boxMax"), max.x(), max.y(), max.z());
     
     // bind culled texture buffer as the target for transform feedback
     glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, culledTbo);
