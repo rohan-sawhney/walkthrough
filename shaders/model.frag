@@ -33,6 +33,6 @@ void main()
     
     float strength = ambientStrength + diffuseStrength * diff + specularStrength * spec;
     
-    if (hasTexture == 1) color = vec4(strength * light.color, 1.0f) * texture(tex, texCoords);
-    else color = vec4(strength * light.color, 1.0f) * objectColor;
+    color = vec4(strength * light.color, 1.0f) * objectColor;
+    if (hasTexture == 1) color = color * texture(tex, texCoords);
 }

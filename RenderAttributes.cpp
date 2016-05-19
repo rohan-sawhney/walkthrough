@@ -143,11 +143,12 @@ void RenderMesh::setDefaultDrawSettings(const Shader& shader, bool cullBackFaces
         glUniform1i(glGetUniformLocation(shader.program, "hasTexture"), 1);
         
     } else {
-        // set diffuse color
         glUniform1i(glGetUniformLocation(shader.program, "hasTexture"), 0);
-        glUniform4f(glGetUniformLocation(shader.program, "objectColor"),
-                    material.color.x(), material.color.y(), material.color.z(), material.alpha);
     }
+    
+    // set diffuse color
+    glUniform4f(glGetUniformLocation(shader.program, "objectColor"),
+                material.color.x(), material.color.y(), material.color.z(), material.alpha);
     
     // disable depth writing for transparent meshes
     if (material.alpha < 1.0) {
