@@ -55,6 +55,7 @@ float lastX = 0.0, lastY = 0.0;
 
 GLuint transformUbo;
 GLuint lightUbo;
+GLuint fbo;
 
 const Eigen::Vector3f lightPosition(0.0, 30.0, 30.0);
 const Eigen::Vector3f lightColor(1.0, 1.0, 1.0);
@@ -65,6 +66,7 @@ bool showWireframe = false;
 
 void init()
 {
+    // enable depth test, blending and multisampling
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -73,6 +75,26 @@ void init()
     glClearColor(0, 0, 0, 0);
     glClearDepth(1.0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    // create and bind framebuffers
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    
+    // create a multisampled color attachment texture
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, gridX, gridY, GL_TRUE);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture, 0);
+    
+    // create a renderbuffer object for depth and stencil attachments
+    GLuint rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, gridX, gridY);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 }
 
 void printInstructions()
@@ -126,7 +148,7 @@ void setUniformBlocks()
     // add light data
     glGenBuffers(1, &lightUbo);
     glBindBuffer(GL_UNIFORM_BUFFER, lightUbo);
-    glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(Eigen::Vector4f), NULL, GL_STATIC_DRAW); // std140 byte alignment
+    glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(Eigen::Vector4f), NULL, GL_STATIC_DRAW); // std140 alignment
     glBindBufferRange(GL_UNIFORM_BUFFER, 1, lightUbo, 0, 2 * sizeof(Eigen::Vector4f));
     
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Eigen::Vector4f), lightPosition.data());
@@ -171,6 +193,7 @@ void updateTitle()
 
 void display()
 {
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     // update uniform blocks
@@ -194,6 +217,10 @@ void display()
     
     // update title
     updateTitle();
+    
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBlitFramebuffer(0, 0, gridX, gridY, 0, 0, gridX, gridY, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     glutSwapBuffers();
 }
@@ -217,6 +244,7 @@ void keyboardPressed(unsigned char key, int x0, int y0)
         skyboxShader.reset();
         glDeleteBuffers(1, &transformUbo);
         glDeleteBuffers(1, &lightUbo);
+        glDeleteFramebuffers(1, &fbo);
         exit(0);
         
     } else if (keys['a']) {
@@ -306,7 +334,7 @@ int main(int argc, char** argv)
     
     InitializeMagick(*argv);
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE | GLUT_3_2_CORE_PROFILE);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_3_2_CORE_PROFILE);
     glutInitWindowSize(gridX, gridY);
     
     std::stringstream title;

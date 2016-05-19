@@ -197,7 +197,6 @@ void RenderMesh::draw(Shader& shader, Shader& cullShader, const int& instanceCou
     glEndTransformFeedback();
     
     glDisable(GL_RASTERIZER_DISCARD);
-    glFlush();
     
     // start drawing
     shader.use();
