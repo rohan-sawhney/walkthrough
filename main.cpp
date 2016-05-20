@@ -8,6 +8,7 @@
 
 #define ESCAPE 27
 #define MSEC_TO_SEC 1000.0
+#define MAX_SAMPLES 4
 
 const std::vector<std::string> paths = {"/Users/rohansawhney/Desktop/developer/C++/walkthrough/loft/loft.txt",
                                         "/Users/rohansawhney/Desktop/developer/C++/walkthrough/campus/campus.txt"};
@@ -92,7 +93,7 @@ void init()
     GLuint rbo;
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, gridX, gridY);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, MAX_SAMPLES, GL_DEPTH24_STENCIL8, gridX, gridY);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 }
