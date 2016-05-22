@@ -172,17 +172,13 @@ void RenderMesh::setDefaultDrawSettings() const
     glDepthMask(GL_TRUE);
 }
 
-void RenderMesh::draw(Shader& shader, Shader& cullShader, const int& instanceCount, bool cullBackFaces) const
+void RenderMesh::cull(const Shader& shader, const int& instanceCount) const
 {
-    // start culling
-    cullShader.use();
-    glEnable(GL_RASTERIZER_DISCARD);
-    
     // set uniforms
     const Eigen::Vector3f& min(boundingBox.min);
     const Eigen::Vector3f& max(boundingBox.max);
-    glUniform3f(glGetUniformLocation(cullShader.program, "boxMin"), min.x(), min.y(), min.z());
-    glUniform3f(glGetUniformLocation(cullShader.program, "boxMax"), max.x(), max.y(), max.z());
+    glUniform3f(glGetUniformLocation(shader.program, "boxMin"), min.x(), min.y(), min.z());
+    glUniform3f(glGetUniformLocation(shader.program, "boxMax"), max.x(), max.y(), max.z());
     
     // bind culled texture buffer as the target for transform feedback
     glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, culledTbo);
@@ -196,29 +192,22 @@ void RenderMesh::draw(Shader& shader, Shader& cullShader, const int& instanceCou
     glDrawArrays(GL_POINTS, 0, (GLsizei)instanceCount);
     glEndQuery(GL_PRIMITIVES_GENERATED);
     glEndTransformFeedback();
-    
-    glDisable(GL_RASTERIZER_DISCARD);
-    
-    // start drawing
-    shader.use();
-    
-    // bind culled vao
-    glBindVertexArray(culledVao);
-    
+}
+
+void RenderMesh::draw(const Shader& shader, bool cullBackFaces) const
+{
     // query
     GLint visibleTransforms;
     glGetQueryObjectiv(query, GL_QUERY_RESULT, &visibleTransforms);
     
-    // draw
     if (visibleTransforms > 0) {
+        glBindVertexArray(culledVao);
         setDefaultDrawSettings(shader, cullBackFaces);
         glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)indices.size(),
                                 GL_UNSIGNED_INT, 0, (GLsizei)visibleTransforms);
         setDefaultDrawSettings();
+        glBindVertexArray(0);
     }
-    
-    // unbind vao
-    glBindVertexArray(0);
 }
 
 void RenderMesh::reset()

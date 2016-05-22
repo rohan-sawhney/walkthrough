@@ -34,8 +34,11 @@ public:
     // set up
     void setup(const std::vector<Eigen::Matrix4f>& transforms);
     
+    // cull
+    void cull(const Shader& shader, const int& instanceCount) const;
+    
     // draw
-    void draw(Shader& shader, Shader& cullShader, const int& instanceCount, bool cullBackFaces) const;
+    void draw(const Shader& shader, bool cullBackFaces) const;
     
     // reset
     void reset();

@@ -205,15 +205,28 @@ void display()
     skybox.draw(skyboxShader);
     
     if (success) {
+        // cull
+        glEnable(GL_RASTERIZER_DISCARD);
+        cullShader.use();
+        model.cull(cullShader);
+        glDisable(GL_RASTERIZER_DISCARD);
+        
         // draw model
         glDepthFunc(GL_LESS);
-        model.draw(modelShader, cullShader);
+        modelShader.use();
+        model.draw(modelShader);
         
         // draw normals
-        if (showNormals) model.draw(normalShader, cullShader);
+        if (showNormals) {
+            normalShader.use();
+            model.draw(normalShader);
+        }
         
         // draw wireframe
-        if (showWireframe) model.draw(wireframeShader, cullShader);
+        if (showWireframe) {
+            wireframeShader.use();
+            model.draw(wireframeShader);
+        }
     }
     
     // update title

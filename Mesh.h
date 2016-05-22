@@ -28,8 +28,11 @@ public:
     // flip orientation
     void flipOrientation();
     
+    // cull
+    void cull(const Shader& shader, const int& instanceCount) const;
+    
     // draw mesh
-    void draw(Shader& shader, Shader& cullShader, const int& instanceCount) const;
+    void draw(const Shader& shader) const;
     
     // reset
     void reset();

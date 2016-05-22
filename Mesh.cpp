@@ -96,10 +96,17 @@ void Mesh::flipOrientation()
     }
 }
 
-void Mesh::draw(Shader& shader, Shader& cullShader, const int& instanceCount) const
+void Mesh::cull(const Shader& shader, const int& instanceCount) const
 {
     for (size_t i = 0; i < renderMeshes.size(); i++) {
-        renderMeshes[i].draw(shader, cullShader, instanceCount, closed);
+        renderMeshes[i].cull(shader, instanceCount);
+    }
+}
+
+void Mesh::draw(const Shader& shader) const
+{
+    for (size_t i = 0; i < renderMeshes.size(); i++) {
+        renderMeshes[i].draw(shader, closed);
     }
 }
 
