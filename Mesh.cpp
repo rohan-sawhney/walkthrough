@@ -61,15 +61,16 @@ void Mesh::setup(const std::vector<Material>& materials, const std::vector<Textu
                 renderVertex.uv = uvs[vIndex];
                 
                 renderMeshes[index].vertices.push_back(renderVertex);
-                renderMeshes[index].boundingBox.expandToInclude(renderVertex.position);
+                cullMesh.boundingBox.expandToInclude(renderVertex.position);
             }
             
             renderMeshes[index].indices.push_back((GLuint)vertexMap[index][vIndex]);
         }
     }
     
+    cullMesh.setup(transforms);
     for (size_t i = 0; i < renderMeshes.size(); i++) {
-        renderMeshes[i].setup(transforms);
+        renderMeshes[i].setup(cullMesh.culledTbo);
     }
     
     // setup lods
@@ -98,15 +99,14 @@ void Mesh::flipOrientation()
 
 void Mesh::cull(const Shader& shader, const int& instanceCount) const
 {
-    for (size_t i = 0; i < renderMeshes.size(); i++) {
-        renderMeshes[i].cull(shader, instanceCount);
-    }
+    cullMesh.cull(shader, instanceCount);
 }
 
 void Mesh::draw(const Shader& shader) const
 {
+    int visibleTransforms = cullMesh.queryVisibleTransforms();
     for (size_t i = 0; i < renderMeshes.size(); i++) {
-        renderMeshes[i].draw(shader, closed);
+        renderMeshes[i].draw(shader, closed, visibleTransforms);
     }
 }
 

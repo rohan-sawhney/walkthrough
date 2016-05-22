@@ -47,8 +47,8 @@ public:
     bool closed;
     
 private:
-    
     // member variables
+    CullMesh cullMesh;
     std::vector<RenderMesh> renderMeshes;
 };
 

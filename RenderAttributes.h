@@ -26,10 +26,10 @@ public:
     GLuint index;
 };
 
-class RenderMesh {
+class CullMesh {
 public:
     // constructor
-    RenderMesh(const Material& material0, const RenderTexture& renderTexture0);
+    CullMesh();
     
     // set up
     void setup(const std::vector<Eigen::Matrix4f>& transforms);
@@ -37,8 +37,33 @@ public:
     // cull
     void cull(const Shader& shader, const int& instanceCount) const;
     
+    // returns visible transform count
+    int queryVisibleTransforms() const;
+    
+    // reset
+    void reset();
+    
+    // member variable
+    BoundingBox boundingBox;
+    GLuint culledTbo;
+    
+private:
+    // member variables
+    GLuint vao;
+    GLuint tbo;
+    GLuint query;
+};
+
+class RenderMesh {
+public:
+    // constructor
+    RenderMesh(const Material& material0, const RenderTexture& renderTexture0);
+    
+    // set up
+    void setup(const GLuint& tbo);
+    
     // draw
-    void draw(const Shader& shader, bool cullBackFaces) const;
+    void draw(const Shader& shader, bool cullBackFaces, const int& visibleTransforms) const;
     
     // reset
     void reset();
@@ -48,15 +73,8 @@ public:
     std::vector<GLuint> indices;
     const Material& material;
     const RenderTexture& renderTexture;
-    BoundingBox boundingBox;
     
 private:
-    // setup culling
-    void setupCullingInformation(const std::vector<Eigen::Matrix4f>& transforms);
-    
-    // setup drawing
-    void setupDrawingInformation();
-    
     // prepare for drawing
     void setDefaultDrawSettings(const Shader& shader, bool cullBackFaces) const;
     
@@ -64,13 +82,9 @@ private:
     void setDefaultDrawSettings() const;
     
     // member variables
+    GLuint vao;
     GLuint vbo;
     GLuint ebo;
-    GLuint vao;
-    GLuint culledVao;
-    GLuint tbo;
-    GLuint culledTbo;
-    GLuint query;
 };
 
 #endif

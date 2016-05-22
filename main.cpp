@@ -207,26 +207,18 @@ void display()
     if (success) {
         // cull
         glEnable(GL_RASTERIZER_DISCARD);
-        cullShader.use();
         model.cull(cullShader);
         glDisable(GL_RASTERIZER_DISCARD);
         
         // draw model
         glDepthFunc(GL_LESS);
-        modelShader.use();
         model.draw(modelShader);
         
         // draw normals
-        if (showNormals) {
-            normalShader.use();
-            model.draw(normalShader);
-        }
+        if (showNormals) model.draw(normalShader);
         
         // draw wireframe
-        if (showWireframe) {
-            wireframeShader.use();
-            model.draw(wireframeShader);
-        }
+        if (showWireframe) model.draw(wireframeShader);
     }
     
     // update title

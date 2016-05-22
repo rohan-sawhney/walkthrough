@@ -35,14 +35,12 @@ void RenderTexture::reset()
     glDeleteTextures(1, &index);
 }
 
-RenderMesh::RenderMesh(const Material& material0, const RenderTexture& renderTexture0):
-material(material0),
-renderTexture(renderTexture0)
+CullMesh::CullMesh()
 {
     
 }
 
-void RenderMesh::setupCullingInformation(const std::vector<Eigen::Matrix4f>& transforms)
+void CullMesh::setup(const std::vector<Eigen::Matrix4f>& transforms)
 {
     // generate and bind vao
     glGenVertexArrays(1, &vao);
@@ -79,11 +77,57 @@ void RenderMesh::setupCullingInformation(const std::vector<Eigen::Matrix4f>& tra
     glBindVertexArray(0);
 }
 
-void RenderMesh::setupDrawingInformation()
+void CullMesh::cull(const Shader& shader, const int& instanceCount) const
 {
-    // generate and bind culled vao
-    glGenVertexArrays(1, &culledVao);
-    glBindVertexArray(culledVao);
+    // set uniforms
+    const Eigen::Vector3f& min(boundingBox.min);
+    const Eigen::Vector3f& max(boundingBox.max);
+    glUniform3f(glGetUniformLocation(shader.program, "boxMin"), min.x(), min.y(), min.z());
+    glUniform3f(glGetUniformLocation(shader.program, "boxMax"), max.x(), max.y(), max.z());
+    
+    // bind culled texture buffer as the target for transform feedback
+    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, culledTbo);
+    
+    // bind vao
+    glBindVertexArray(vao);
+    
+    // start transform feedback
+    glBeginTransformFeedback(GL_POINTS);
+    glBeginQuery(GL_PRIMITIVES_GENERATED, query);
+    glDrawArrays(GL_POINTS, 0, (GLsizei)instanceCount);
+    glEndQuery(GL_PRIMITIVES_GENERATED);
+    glEndTransformFeedback();
+}
+
+int CullMesh::queryVisibleTransforms() const
+{
+    // query
+    GLint visibleTransforms;
+    glGetQueryObjectiv(query, GL_QUERY_RESULT, &visibleTransforms);
+    
+    return (int)visibleTransforms;
+}
+
+void CullMesh::reset()
+{
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &tbo);
+    glDeleteBuffers(1, &culledTbo);
+    glDeleteQueries(1, &query);
+}
+
+RenderMesh::RenderMesh(const Material& material0, const RenderTexture& renderTexture0):
+material(material0),
+renderTexture(renderTexture0)
+{
+    
+}
+
+void RenderMesh::setup(const GLuint& tbo)
+{
+    // generate and bind vao
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
     
     // generate and bind ebo
     glGenBuffers(1, &ebo);
@@ -105,8 +149,8 @@ void RenderMesh::setupDrawingInformation()
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(RenderVertex), (GLvoid*)offsetof(RenderVertex, uv));
     
-    // bind culled tbo and set vertex attribute pointers for tbo data
-    glBindBuffer(GL_ARRAY_BUFFER, culledTbo);
+    // bind tbo and set vertex attribute pointers for tbo data
+    glBindBuffer(GL_ARRAY_BUFFER, tbo);
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)0);
     glVertexAttribDivisor(3, 1);
@@ -123,14 +167,8 @@ void RenderMesh::setupDrawingInformation()
     glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)(3*sizeof(Eigen::Vector4f)));
     glVertexAttribDivisor(6, 1);
     
-    // unbind culled vao
+    // unbind vao
     glBindVertexArray(0);
-}
-
-void RenderMesh::setup(const std::vector<Eigen::Matrix4f>& transforms)
-{
-    setupCullingInformation(transforms);
-    setupDrawingInformation();
 }
 
 void RenderMesh::setDefaultDrawSettings(const Shader& shader, bool cullBackFaces) const
@@ -172,51 +210,20 @@ void RenderMesh::setDefaultDrawSettings() const
     glDepthMask(GL_TRUE);
 }
 
-void RenderMesh::cull(const Shader& shader, const int& instanceCount) const
+void RenderMesh::draw(const Shader& shader, bool cullBackFaces, const int& visibleTransforms) const
 {
-    // set uniforms
-    const Eigen::Vector3f& min(boundingBox.min);
-    const Eigen::Vector3f& max(boundingBox.max);
-    glUniform3f(glGetUniformLocation(shader.program, "boxMin"), min.x(), min.y(), min.z());
-    glUniform3f(glGetUniformLocation(shader.program, "boxMax"), max.x(), max.y(), max.z());
-    
-    // bind culled texture buffer as the target for transform feedback
-    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, culledTbo);
-    
-    // bind vao
-    glBindVertexArray(vao);
-    
-    // start transform feedback
-    glBeginTransformFeedback(GL_POINTS);
-    glBeginQuery(GL_PRIMITIVES_GENERATED, query);
-    glDrawArrays(GL_POINTS, 0, (GLsizei)instanceCount);
-    glEndQuery(GL_PRIMITIVES_GENERATED);
-    glEndTransformFeedback();
-}
-
-void RenderMesh::draw(const Shader& shader, bool cullBackFaces) const
-{
-    // query
-    GLint visibleTransforms;
-    glGetQueryObjectiv(query, GL_QUERY_RESULT, &visibleTransforms);
-    
     if (visibleTransforms > 0) {
-        glBindVertexArray(culledVao);
+        glBindVertexArray(vao);
         setDefaultDrawSettings(shader, cullBackFaces);
         glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)indices.size(),
                                 GL_UNSIGNED_INT, 0, (GLsizei)visibleTransforms);
         setDefaultDrawSettings();
-        glBindVertexArray(0);
     }
 }
 
 void RenderMesh::reset()
 {
     glDeleteVertexArrays(1, &vao);
-    glDeleteVertexArrays(1, &culledVao);
     glDeleteBuffers(1, &ebo);
-    glDeleteBuffers(1, &tbo);
-    glDeleteBuffers(1, &culledTbo);
     glDeleteBuffers(1, &vbo);
-    glDeleteQueries(1, &query);
 }
