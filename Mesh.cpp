@@ -112,6 +112,7 @@ void Mesh::draw(const Shader& shader) const
 
 void Mesh::reset()
 {
+    cullMesh.reset();
     for (size_t i = 0; i < renderMeshes.size(); i++) {
         renderMeshes[i].reset();
     }

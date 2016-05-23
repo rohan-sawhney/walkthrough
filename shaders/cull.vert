@@ -11,7 +11,7 @@ layout (std140) uniform Transform {
 uniform vec3 boxMin;
 uniform vec3 boxMax;
 
-void main(void)
+void main()
 {
     // set model matrix
     modelMatrix = model;
@@ -43,9 +43,6 @@ void main(void)
 
     objectVisible = 1;
     for (int i = 0; i < 6; i++) {
-        if (outOfBound[i] == 8) {
-            objectVisible = 0;
-            break;
-        }
+        if (outOfBound[i] == 8) objectVisible = 0;
     }
 }
