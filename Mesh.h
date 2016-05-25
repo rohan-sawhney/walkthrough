@@ -19,8 +19,10 @@ public:
     Eigen::Vector3f cm();
     
     // set up
-    void setup(const std::vector<Material>& materials, const std::vector<Texture>& textures,
-               const std::vector<Eigen::Matrix4f>& transforms, const TransformBufferData& data);
+    void setup(const std::vector<Material>& materials,
+               const std::vector<Texture>& textures,
+               const std::vector<Eigen::Matrix4f>& transforms,
+               const TransformBufferData& cullData, const TransformBufferData& renderData);
     
     // checks for transparency
     bool hasTransparency(const std::vector<Material>& materials) const;

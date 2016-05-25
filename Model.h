@@ -41,6 +41,8 @@ private:
     std::vector<Instance> instances;
     std::vector<Material> materials;
     std::vector<Texture> textures;
+    TransformBufferManager cullTBManager;
+    TransformBufferManager renderTBManager;
 };
 
 #endif

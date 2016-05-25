@@ -7,12 +7,12 @@ Instance::Instance()
 
 void Instance::setup(const std::vector<Material>& materials, const std::vector<Texture>& textures)
 {
-    mesh.setup(materials, textures, transforms, data);
+    mesh.setup(materials, textures, transforms, cullData, renderData);
 }
 
 void Instance::cull(const Shader& shader) const
 {
-    mesh.cull(shader, data);
+    mesh.cull(shader, renderData);
 }
 
 void Instance::draw(const Shader& shader) const

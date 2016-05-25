@@ -119,10 +119,12 @@ void Model::setupInstances()
     createMirroredInstances();
     separateTransparentInstances();
     centerModel();
-    TransformBufferManager::setup(instances);
+    cullTBManager.setup(instances, true);
+    renderTBManager.setup(instances, false);
     
     for (size_t i = 0; i < instances.size(); i++) {
-        TransformBufferManager::setInstanceBufferData(i, instances[i].transforms.size(), instances[i].data);
+        cullTBManager.setInstanceBufferData(i, instances[i].transforms.size(), instances[i].cullData);
+        renderTBManager.setInstanceBufferData(i, instances[i].transforms.size(), instances[i].renderData);
         
         if (instances[i].transforms[0].determinant() < 0) instances[i].mesh.flipOrientation();
         instances[i].setup(materials, textures);
@@ -145,5 +147,6 @@ void Model::reset()
     instances.clear();
     materials.clear();
     textures.clear();
-    TransformBufferManager::reset();
+    cullTBManager.reset();
+    renderTBManager.reset();
 }

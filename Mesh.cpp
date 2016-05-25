@@ -29,8 +29,10 @@ Eigen::Vector3f Mesh::cm()
     return cm;
 }
 
-void Mesh::setup(const std::vector<Material>& materials, const std::vector<Texture>& textures,
-                 const std::vector<Eigen::Matrix4f>& transforms, const TransformBufferData& data)
+void Mesh::setup(const std::vector<Material>& materials,
+                 const std::vector<Texture>& textures,
+                 const std::vector<Eigen::Matrix4f>& transforms,
+                 const TransformBufferData& cullData, const TransformBufferData& renderData)
 {
     // create render meshes
     renderMeshes.reserve(mIndices.size());
@@ -68,14 +70,14 @@ void Mesh::setup(const std::vector<Material>& materials, const std::vector<Textu
         }
     }
     
-    cullMesh.setup(transforms);
+    cullMesh.setup(cullData);
     for (size_t i = 0; i < renderMeshes.size(); i++) {
-        renderMeshes[i].setup(data);
+        renderMeshes[i].setup(renderData);
     }
     
     // setup lods
     for (size_t i = 0; i < lods.size(); i++) {
-        lods[i].setup(materials, textures, transforms, data);
+        lods[i].setup(materials, textures, transforms, cullData, renderData);
     }
 }
 

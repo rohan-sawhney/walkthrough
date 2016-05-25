@@ -24,7 +24,8 @@ public:
     // member variables
     Mesh mesh;
     std::vector<Eigen::Matrix4f> transforms;
-    TransformBufferData data;
+    TransformBufferData cullData;
+    TransformBufferData renderData;
 };
 
 #endif

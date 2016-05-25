@@ -36,19 +36,19 @@ struct TransformBufferData {
 class TransformBufferManager {
 public:
     // set up
-    static void setup(const std::vector<Instance>& instances);
+    void setup(const std::vector<Instance>& instances, const bool& loadTransforms);
     
     // sets instance tbo and offset
-    static void setInstanceBufferData(const size_t& instanceIndex, const size_t& count, TransformBufferData& data);
+    void setInstanceBufferData(const size_t& instanceIndex, const size_t& count, TransformBufferData& data);
     
     // reset
-    static void reset();
+    void reset();
     
 private:
     // member variables
-    static std::vector<GLuint> tbos;
-    static std::unordered_map<size_t, std::pair<size_t, size_t>> tboMap;
-    static std::unordered_map<size_t, GLuint> indexMap;
+    std::vector<GLuint> tbos;
+    std::unordered_map<size_t, std::pair<size_t, size_t>> tboMap;
+    std::unordered_map<size_t, GLuint> indexMap;
 };
 
 class CullMesh {
@@ -57,7 +57,7 @@ public:
     CullMesh();
     
     // set up
-    void setup(const std::vector<Eigen::Matrix4f>& transforms);
+    void setup(const TransformBufferData& data);
     
     // returns query count
     int queryCount() const;
@@ -74,7 +74,6 @@ public:
 private:
     // member variables
     GLuint vao;
-    GLuint tbo;
     GLuint query;
 };
 

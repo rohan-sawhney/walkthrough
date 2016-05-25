@@ -38,11 +38,7 @@ void RenderTexture::reset()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<GLuint> TransformBufferManager::tbos;
-std::unordered_map<size_t, std::pair<size_t, size_t>> TransformBufferManager::tboMap;
-std::unordered_map<size_t, GLuint> TransformBufferManager::indexMap;
-
-void TransformBufferManager::setup(const std::vector<Instance>& instances)
+void TransformBufferManager::setup(const std::vector<Instance>& instances, const bool& loadTransforms)
 {
     size_t n = 0;
     GLuint index = 0;
@@ -71,15 +67,29 @@ void TransformBufferManager::setup(const std::vector<Instance>& instances)
     bufferSizes.push_back(n);
     
     // generate and bind tbos
+    GLenum usage = loadTransforms ? GL_STATIC_DRAW : GL_DYNAMIC_COPY;
     glGenBuffers((GLsizei)tbos.size(), &tbos[0]);
     for (size_t i = 0; i < tbos.size(); i++) {
         glBindBuffer(GL_TEXTURE_BUFFER, tbos[i]);
-        glBufferData(GL_TEXTURE_BUFFER, bufferSizes[i], NULL, GL_DYNAMIC_COPY);
+        glBufferData(GL_TEXTURE_BUFFER, bufferSizes[i], NULL, usage);
+    }
+    
+    if (loadTransforms) {
+        for (size_t i = 0; i < instances.size(); i++) {
+            const std::vector<Eigen::Matrix4f>& transforms(instances[i].transforms);
+            size_t size = sizeof(Eigen::Matrix4f) * transforms.size();
+            
+            // bind instance data
+            glBindBuffer(GL_ARRAY_BUFFER, tbos[tboMap[i].first]);
+            void *ptr = glMapBufferRange(GL_ARRAY_BUFFER, tboMap[i].second, size, GL_MAP_WRITE_BIT);
+            memcpy(ptr, &transforms[0], size);
+            glUnmapBuffer(GL_ARRAY_BUFFER);
+        }
     }
 }
 
 void TransformBufferManager::setInstanceBufferData(const size_t& instanceIndex, const size_t& count,
-                                              TransformBufferData& data)
+                                                   TransformBufferData& data)
 {
     data.tbo = tbos[tboMap[instanceIndex].first];
     data.offset = tboMap[instanceIndex].second;
@@ -103,30 +113,28 @@ CullMesh::CullMesh()
     
 }
 
-void CullMesh::setup(const std::vector<Eigen::Matrix4f>& transforms)
+void CullMesh::setup(const TransformBufferData& data)
 {
     // generate and bind vao
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     
-    // generate and bind tbo
-    glGenBuffers(1, &tbo);
-    glBindBuffer(GL_TEXTURE_BUFFER, tbo);
-    glBufferData(GL_TEXTURE_BUFFER, sizeof(Eigen::Matrix4f)*transforms.size(), &transforms[0], GL_STATIC_DRAW);
-    
     // bind tbo and set vertex attribute pointers for tbo data
-    glBindBuffer(GL_ARRAY_BUFFER, tbo);
+    glBindBuffer(GL_ARRAY_BUFFER, data.tbo);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)data.offset);
     
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)(sizeof(Eigen::Vector4f)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f),
+                          (GLvoid*)(data.offset + sizeof(Eigen::Vector4f)));
     
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)(2*sizeof(Eigen::Vector4f)));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f),
+                          (GLvoid*)(data.offset + 2*sizeof(Eigen::Vector4f)));
     
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)(3*sizeof(Eigen::Vector4f)));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f),
+                          (GLvoid*)(data.offset + 3*sizeof(Eigen::Vector4f)));
     
     // generate query
     glGenQueries(1, &query);
@@ -168,7 +176,6 @@ void CullMesh::cull(const Shader& shader, const TransformBufferData& data) const
 void CullMesh::reset()
 {
     glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &tbo);
     glDeleteQueries(1, &query);
 }
 
