@@ -20,7 +20,7 @@ public:
     
     // set up
     void setup(const std::vector<Material>& materials, const std::vector<Texture>& textures,
-               const std::vector<Eigen::Matrix4f>& transforms);
+               const std::vector<Eigen::Matrix4f>& transforms, const TransformBufferData& data);
     
     // checks for transparency
     bool hasTransparency(const std::vector<Material>& materials) const;
@@ -29,7 +29,7 @@ public:
     void flipOrientation();
     
     // cull
-    void cull(const Shader& shader, const int& instanceCount) const;
+    void cull(const Shader& shader, const TransformBufferData& data) const;
     
     // draw mesh
     void draw(const Shader& shader) const;

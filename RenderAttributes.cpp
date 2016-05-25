@@ -1,4 +1,5 @@
 #include "RenderAttributes.h"
+#include "Instance.h"
 
 RenderTexture::RenderTexture()
 {
@@ -35,6 +36,68 @@ void RenderTexture::reset()
     glDeleteTextures(1, &index);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+std::vector<GLuint> TransformBufferManager::tbos;
+std::unordered_map<size_t, std::pair<size_t, size_t>> TransformBufferManager::tboMap;
+std::unordered_map<size_t, GLuint> TransformBufferManager::indexMap;
+
+void TransformBufferManager::setup(const std::vector<Instance>& instances)
+{
+    size_t n = 0;
+    GLuint index = 0;
+    std::vector<size_t> bufferSizes;
+    const size_t maxBufferSize = sizeof(float) * GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS;
+    
+    // determine minimum tbos needed
+    // NOTE: assumes elements4x4 * instances[i].transforms.size() < GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS
+    for (size_t i = 0; i < instances.size(); i++) {
+        size_t tSize = sizeof(Eigen::Matrix4f) * instances[i].transforms.size();
+        if (n + tSize < maxBufferSize) {
+            n += tSize;
+        
+        } else {
+            tbos.push_back(0);
+            bufferSizes.push_back(n);
+            n = tSize;
+            index = 0;
+        }
+        
+        tboMap[i] = std::make_pair(tbos.size(), n-tSize);
+        indexMap[i] = index;
+        index++;
+    }
+    tbos.push_back(0);
+    bufferSizes.push_back(n);
+    
+    // generate and bind tbos
+    glGenBuffers((GLsizei)tbos.size(), &tbos[0]);
+    for (size_t i = 0; i < tbos.size(); i++) {
+        glBindBuffer(GL_TEXTURE_BUFFER, tbos[i]);
+        glBufferData(GL_TEXTURE_BUFFER, bufferSizes[i], NULL, GL_DYNAMIC_COPY);
+    }
+}
+
+void TransformBufferManager::setInstanceBufferData(const size_t& instanceIndex, const size_t& count,
+                                              TransformBufferData& data)
+{
+    data.tbo = tbos[tboMap[instanceIndex].first];
+    data.offset = tboMap[instanceIndex].second;
+    data.count = count;
+    data.size = sizeof(Eigen::Matrix4f) * count;
+}
+
+void TransformBufferManager::reset()
+{
+    glDeleteBuffers((GLsizei)tbos.size(), &tbos[0]);
+    
+    tbos.clear();
+    tboMap.clear();
+    indexMap.clear();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 CullMesh::CullMesh()
 {
     
@@ -65,11 +128,6 @@ void CullMesh::setup(const std::vector<Eigen::Matrix4f>& transforms)
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)(3*sizeof(Eigen::Vector4f)));
     
-    // generate and bind culled tbo
-    glGenBuffers(1, &culledTbo);
-    glBindBuffer(GL_TEXTURE_BUFFER, culledTbo);
-    glBufferData(GL_TEXTURE_BUFFER, sizeof(Eigen::Matrix4f)*transforms.size(), NULL, GL_DYNAMIC_COPY);
-    
     // generate query
     glGenQueries(1, &query);
     
@@ -77,7 +135,15 @@ void CullMesh::setup(const std::vector<Eigen::Matrix4f>& transforms)
     glBindVertexArray(0);
 }
 
-void CullMesh::cull(const Shader& shader, const int& instanceCount) const
+int CullMesh::queryCount() const
+{
+    GLint count;
+    glGetQueryObjectiv(query, GL_QUERY_RESULT, &count);
+    
+    return (int)count;
+}
+
+void CullMesh::cull(const Shader& shader, const TransformBufferData& data) const
 {
     // set uniforms
     const Eigen::Vector3f& min(boundingBox.min);
@@ -86,7 +152,7 @@ void CullMesh::cull(const Shader& shader, const int& instanceCount) const
     glUniform3f(glGetUniformLocation(shader.program, "boxMax"), max.x(), max.y(), max.z());
     
     // bind culled texture buffer as the target for transform feedback
-    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, culledTbo);
+    glBindBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, 0, data.tbo, data.offset, data.size);
     
     // bind vao
     glBindVertexArray(vao);
@@ -94,27 +160,19 @@ void CullMesh::cull(const Shader& shader, const int& instanceCount) const
     // start transform feedback
     glBeginTransformFeedback(GL_POINTS);
     glBeginQuery(GL_PRIMITIVES_GENERATED, query);
-    glDrawArrays(GL_POINTS, 0, (GLsizei)instanceCount);
+    glDrawArrays(GL_POINTS, 0, (GLsizei)data.count);
     glEndQuery(GL_PRIMITIVES_GENERATED);
     glEndTransformFeedback();
-}
-
-int CullMesh::queryVisibleTransforms() const
-{
-    // query
-    GLint visibleTransforms;
-    glGetQueryObjectiv(query, GL_QUERY_RESULT, &visibleTransforms);
-    
-    return (int)visibleTransforms;
 }
 
 void CullMesh::reset()
 {
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &tbo);
-    glDeleteBuffers(1, &culledTbo);
     glDeleteQueries(1, &query);
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 RenderMesh::RenderMesh(const Material& material0, const RenderTexture& renderTexture0):
 material(material0),
@@ -123,7 +181,7 @@ renderTexture(renderTexture0)
     
 }
 
-void RenderMesh::setup(const GLuint& tbo)
+void RenderMesh::setup(const TransformBufferData& data)
 {
     // generate and bind vao
     glGenVertexArrays(1, &vao);
@@ -150,21 +208,24 @@ void RenderMesh::setup(const GLuint& tbo)
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(RenderVertex), (GLvoid*)offsetof(RenderVertex, uv));
     
     // bind tbo and set vertex attribute pointers for tbo data
-    glBindBuffer(GL_ARRAY_BUFFER, tbo);
+    glBindBuffer(GL_ARRAY_BUFFER, data.tbo);
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)0);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)data.offset);
     glVertexAttribDivisor(3, 1);
     
     glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)(sizeof(Eigen::Vector4f)));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f),
+                          (GLvoid*)(data.offset + sizeof(Eigen::Vector4f)));
     glVertexAttribDivisor(4, 1);
     
     glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)(2*sizeof(Eigen::Vector4f)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f),
+                          (GLvoid*)(data.offset + 2*sizeof(Eigen::Vector4f)));
     glVertexAttribDivisor(5, 1);
     
     glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)(3*sizeof(Eigen::Vector4f)));
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f),
+                          (GLvoid*)(data.offset + 3*sizeof(Eigen::Vector4f)));
     glVertexAttribDivisor(6, 1);
     
     // unbind vao
@@ -212,13 +273,10 @@ void RenderMesh::setDefaultDrawSettings() const
 
 void RenderMesh::draw(const Shader& shader, bool cullBackFaces, const int& visibleTransforms) const
 {
-    if (visibleTransforms > 0) {
-        glBindVertexArray(vao);
-        setDefaultDrawSettings(shader, cullBackFaces);
-        glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)indices.size(),
-                                GL_UNSIGNED_INT, 0, (GLsizei)visibleTransforms);
-        setDefaultDrawSettings();
-    }
+    glBindVertexArray(vao);
+    setDefaultDrawSettings(shader, cullBackFaces);
+    glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0, (GLsizei)visibleTransforms);
+    setDefaultDrawSettings();
 }
 
 void RenderMesh::reset()

@@ -30,7 +30,7 @@ Eigen::Vector3f Mesh::cm()
 }
 
 void Mesh::setup(const std::vector<Material>& materials, const std::vector<Texture>& textures,
-                 const std::vector<Eigen::Matrix4f>& transforms)
+                 const std::vector<Eigen::Matrix4f>& transforms, const TransformBufferData& data)
 {
     // create render meshes
     renderMeshes.reserve(mIndices.size());
@@ -64,18 +64,18 @@ void Mesh::setup(const std::vector<Material>& materials, const std::vector<Textu
                 cullMesh.boundingBox.expandToInclude(renderVertex.position);
             }
             
-            renderMeshes[index].indices.push_back((GLuint)vertexMap[index][vIndex]);
+            renderMeshes[index].indices.push_back(vertexMap[index][vIndex]);
         }
     }
     
     cullMesh.setup(transforms);
     for (size_t i = 0; i < renderMeshes.size(); i++) {
-        renderMeshes[i].setup(cullMesh.culledTbo);
+        renderMeshes[i].setup(data);
     }
     
     // setup lods
     for (size_t i = 0; i < lods.size(); i++) {
-        lods[i].setup(materials, textures, transforms);
+        lods[i].setup(materials, textures, transforms, data);
     }
 }
 
@@ -97,16 +97,18 @@ void Mesh::flipOrientation()
     }
 }
 
-void Mesh::cull(const Shader& shader, const int& instanceCount) const
+void Mesh::cull(const Shader& shader, const TransformBufferData& data) const
 {
-    cullMesh.cull(shader, instanceCount);
+    cullMesh.cull(shader, data);
 }
 
 void Mesh::draw(const Shader& shader) const
 {
-    int visibleTransforms = cullMesh.queryVisibleTransforms();
-    for (size_t i = 0; i < renderMeshes.size(); i++) {
-        renderMeshes[i].draw(shader, closed, visibleTransforms);
+    int visibleTransforms = cullMesh.queryCount();
+    if (visibleTransforms > 0) {
+        for (size_t i = 0; i < renderMeshes.size(); i++) {
+            renderMeshes[i].draw(shader, closed, visibleTransforms);
+        }
     }
 }
 

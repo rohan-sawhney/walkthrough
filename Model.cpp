@@ -23,7 +23,7 @@ void Model::cull(Shader& shader) const
 {
     shader.use();
     for (size_t i = 0; i < instances.size(); i++) {
-        instances[i].mesh.cull(shader, (int)instances[i].transforms.size());
+        instances[i].cull(shader);
     }
 }
 
@@ -31,7 +31,7 @@ void Model::draw(Shader& shader) const
 {
     shader.use();
     for (size_t i = 0; i < instances.size(); i++) {
-        instances[i].mesh.draw(shader);
+        instances[i].draw(shader);
     }
 }
 
@@ -119,10 +119,13 @@ void Model::setupInstances()
     createMirroredInstances();
     separateTransparentInstances();
     centerModel();
+    TransformBufferManager::setup(instances);
     
     for (size_t i = 0; i < instances.size(); i++) {
+        TransformBufferManager::setInstanceBufferData(i, instances[i].transforms.size(), instances[i].data);
+        
         if (instances[i].transforms[0].determinant() < 0) instances[i].mesh.flipOrientation();
-        instances[i].mesh.setup(materials, textures, instances[i].transforms);
+        instances[i].setup(materials, textures);
     }
 }
 
@@ -130,7 +133,7 @@ void Model::reset()
 {
     // reset meshes
     for (size_t i = 0; i < instances.size(); i++) {
-        instances[i].mesh.reset();
+        instances[i].reset();
     }
 
     // reset textures
@@ -142,4 +145,5 @@ void Model::reset()
     instances.clear();
     materials.clear();
     textures.clear();
+    TransformBufferManager::reset();
 }

@@ -26,6 +26,31 @@ public:
     GLuint index;
 };
 
+struct TransformBufferData {
+    GLuint tbo;
+    size_t offset;
+    size_t count;
+    size_t size;
+};
+
+class TransformBufferManager {
+public:
+    // set up
+    static void setup(const std::vector<Instance>& instances);
+    
+    // sets instance tbo and offset
+    static void setInstanceBufferData(const size_t& instanceIndex, const size_t& count, TransformBufferData& data);
+    
+    // reset
+    static void reset();
+    
+private:
+    // member variables
+    static std::vector<GLuint> tbos;
+    static std::unordered_map<size_t, std::pair<size_t, size_t>> tboMap;
+    static std::unordered_map<size_t, GLuint> indexMap;
+};
+
 class CullMesh {
 public:
     // constructor
@@ -34,18 +59,17 @@ public:
     // set up
     void setup(const std::vector<Eigen::Matrix4f>& transforms);
     
-    // cull
-    void cull(const Shader& shader, const int& instanceCount) const;
+    // returns query count
+    int queryCount() const;
     
-    // returns visible transform count
-    int queryVisibleTransforms() const;
+    // cull
+    void cull(const Shader& shader, const TransformBufferData& data) const;
     
     // reset
     void reset();
     
     // member variable
     BoundingBox boundingBox;
-    GLuint culledTbo;
     
 private:
     // member variables
@@ -60,7 +84,7 @@ public:
     RenderMesh(const Material& material0, const RenderTexture& renderTexture0);
     
     // set up
-    void setup(const GLuint& tbo);
+    void setup(const TransformBufferData& data);
     
     // draw
     void draw(const Shader& shader, bool cullBackFaces, const int& visibleTransforms) const;
