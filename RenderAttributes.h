@@ -2,7 +2,6 @@
 #define RENDER_ATTRIBUTES_H
 
 #include "Types.h"
-#include "Material.h"
 #include "Shader.h"
 #include "BoundingBox.h"
 
@@ -26,67 +25,46 @@ public:
     GLuint index;
 };
 
-struct TransformBufferData {
-    GLuint tbo;
-    size_t offset;
-    size_t count;
-    size_t size;
-};
-
-class TransformBufferManager {
-public:
-    // set up
-    void setup(const std::vector<Instance>& instances, const bool& loadTransforms);
-    
-    // sets instance tbo and offset
-    void setInstanceBufferData(const size_t& instanceIndex, const size_t& count, TransformBufferData& data);
-    
-    // reset
-    void reset();
-    
-private:
-    // member variables
-    std::vector<GLuint> tbos;
-    std::unordered_map<size_t, std::pair<size_t, size_t>> tboMap;
-    std::unordered_map<size_t, GLuint> indexMap;
-};
-
 class CullMesh {
 public:
     // constructor
-    CullMesh();
+    CullMesh(const std::vector<Eigen::Matrix4f>& transforms0);
     
     // set up
-    void setup(const TransformBufferData& data);
-    
-    // returns query count
-    int queryCount() const;
+    void setup();
     
     // cull
-    void cull(const Shader& shader, const TransformBufferData& data) const;
+    void cull(const Shader& shader);
+    
+    // returns query count
+    int queryCount();
     
     // reset
     void reset();
     
     // member variable
     BoundingBox boundingBox;
+    const std::vector<Eigen::Matrix4f>& transforms;
+    GLuint culledTbo;
     
 private:
     // member variables
     GLuint vao;
+    GLuint tbo;
     GLuint query;
+    GLint count;
 };
 
 class RenderMesh {
 public:
     // constructor
-    RenderMesh(const Material& material0, const RenderTexture& renderTexture0);
+    RenderMesh(const int& cullIndex0, const int& mIndex0, const bool& closed0);
     
     // set up
-    void setup(const TransformBufferData& data);
+    void setup(const GLuint& tbo);
     
     // draw
-    void draw(const Shader& shader, bool cullBackFaces, const int& visibleTransforms) const;
+    void draw(const size_t& visibleTransforms) const;
     
     // reset
     void reset();
@@ -94,16 +72,11 @@ public:
     // member variables
     std::vector<RenderVertex> vertices;
     std::vector<GLuint> indices;
-    const Material& material;
-    const RenderTexture& renderTexture;
-    
+    int cullIndex;
+    int mIndex;
+    bool closed;
+
 private:
-    // prepare for drawing
-    void setDefaultDrawSettings(const Shader& shader, bool cullBackFaces) const;
-    
-    // cleanup after drawing
-    void setDefaultDrawSettings() const;
-    
     // member variables
     GLuint vao;
     GLuint vbo;

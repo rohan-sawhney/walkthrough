@@ -74,10 +74,6 @@ bool MeshIO::readGeometry(const std::string& path,
                 mesh.faces[f].mIndex = mIndex;
                 mesh.faces[f].index = f;
                 
-                if (std::find(mesh.mIndices.begin(), mesh.mIndices.end(), mIndex) == mesh.mIndices.end()) {
-                    mesh.mIndices.push_back(mIndex);
-                }
-                
             } else if (token == "t") {
                 Eigen::Matrix4f transform;
                 for (int i = 0; i < 4; i++) {

@@ -6,18 +6,6 @@ closed(false)
     
 }
 
-Mesh& Mesh::operator=(const Mesh& mesh)
-{
-    vertices = mesh.vertices;
-    uvs = mesh.uvs;
-    normals = mesh.normals;
-    faces = mesh.faces;
-    mIndices = mesh.mIndices;
-    closed = mesh.closed;
-    
-    return *this;
-}
-
 Eigen::Vector3f Mesh::cm()
 {
     Eigen::Vector3f cm = Eigen::Vector3f::Zero();
@@ -29,13 +17,9 @@ Eigen::Vector3f Mesh::cm()
     return cm;
 }
 
-void Mesh::setup(const std::vector<Material>& materials,
-                 const std::vector<Texture>& textures,
-                 const std::vector<Eigen::Matrix4f>& transforms,
-                 const TransformBufferData& cullData, const TransformBufferData& renderData)
+void Mesh::setRenderMeshes(std::vector<RenderMesh>& renderMeshes, const int& cullIndex)
 {
     // create render meshes
-    renderMeshes.reserve(mIndices.size());
     std::unordered_map<int, int> materialMap;
     std::unordered_map<int, std::unordered_map<int, int>> vertexMap;
     
@@ -43,9 +27,7 @@ void Mesh::setup(const std::vector<Material>& materials,
         // create render mesh if it doesnt exist
         if (materialMap.find(f->mIndex) == materialMap.end()) {
             materialMap[f->mIndex] = (int)renderMeshes.size();
-            
-            const Material& material(materials[f->mIndex]);
-            renderMeshes.push_back(RenderMesh(material, textures[material.tIndex].renderTexture));
+            renderMeshes.push_back(RenderMesh(cullIndex, f->mIndex, closed));
         }
         
         // set vertices and indices
@@ -61,35 +43,12 @@ void Mesh::setup(const std::vector<Material>& materials,
                 renderVertex.position = vertices[vIndex].position;
                 renderVertex.normal = normals[vIndex];
                 renderVertex.uv = uvs[vIndex];
-                
                 renderMeshes[index].vertices.push_back(renderVertex);
-                cullMesh.boundingBox.expandToInclude(renderVertex.position);
             }
             
             renderMeshes[index].indices.push_back(vertexMap[index][vIndex]);
         }
     }
-    
-    cullMesh.setup(cullData);
-    for (size_t i = 0; i < renderMeshes.size(); i++) {
-        renderMeshes[i].setup(renderData);
-    }
-    
-    // setup lods
-    for (size_t i = 0; i < lods.size(); i++) {
-        lods[i].setup(materials, textures, transforms, cullData, renderData);
-    }
-}
-
-bool Mesh::hasTransparency(const std::vector<Material>& materials) const
-{
-    for (size_t i = 0; i < mIndices.size(); i++) {
-        if (materials[mIndices[i]].alpha < 1.0) {
-            return true;
-        }
-    }
-    
-    return false;
 }
 
 void Mesh::flipOrientation()
@@ -98,27 +57,3 @@ void Mesh::flipOrientation()
         std::swap(f->vIndices[0], f->vIndices[1]);
     }
 }
-
-void Mesh::cull(const Shader& shader, const TransformBufferData& data) const
-{
-    cullMesh.cull(shader, data);
-}
-
-void Mesh::draw(const Shader& shader) const
-{
-    int visibleTransforms = cullMesh.queryCount();
-    if (visibleTransforms > 0) {
-        for (size_t i = 0; i < renderMeshes.size(); i++) {
-            renderMeshes[i].draw(shader, closed, visibleTransforms);
-        }
-    }
-}
-
-void Mesh::reset()
-{
-    cullMesh.reset();
-    for (size_t i = 0; i < renderMeshes.size(); i++) {
-        renderMeshes[i].reset();
-    }
-}
-
