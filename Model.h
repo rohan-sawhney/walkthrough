@@ -30,9 +30,6 @@ private:
     // create mirrored instances
     void createMirroredInstances();
     
-    // correct orientation
-    void correctOrientation();
-    
     // center model
     void centerModel();
     

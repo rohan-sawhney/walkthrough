@@ -101,6 +101,7 @@ void Model::createMirroredInstances()
         if (createInstance) {
             instances.push_back(Instance());
             instances[index].mesh = instances[i].mesh;
+            instances[index].mesh.flipOrientation();
             instances[i].transforms.clear();
             
             // assign transforms
@@ -109,14 +110,10 @@ void Model::createMirroredInstances()
                 else instances[index].transforms.push_back(transforms[j]);
             }
             index++;
+        
+        } else if (sign == -1) {
+            instances[i].mesh.flipOrientation();
         }
-    }
-}
-
-void Model::correctOrientation()
-{
-    for (size_t i = 0; i < instances.size(); i++) {
-        if (instances[i].transforms[0].determinant() < 0) instances[i].mesh.flipOrientation();
     }
 }
 
@@ -148,7 +145,6 @@ void Model::centerModel()
 void Model::setupInstances()
 {
     createMirroredInstances();
-    correctOrientation();
     centerModel();
 }
 
