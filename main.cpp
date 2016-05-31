@@ -85,7 +85,7 @@ void init()
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, gridX, gridY, GL_TRUE);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MAX_SAMPLES, GL_RGB, gridX, gridY, GL_TRUE);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture, 0);
     
@@ -138,7 +138,7 @@ void setUniformBlocks()
     glBindBuffer(GL_UNIFORM_BUFFER, transformUbo);
     glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    glBindBufferRange(GL_UNIFORM_BUFFER, 0, transformUbo, 0, 2 * sizeof(glm::mat4));
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, transformUbo);
     
     // 2) generate light index
     modelShaderIndex = glGetUniformBlockIndex(modelShader.program, "Light");
@@ -150,7 +150,7 @@ void setUniformBlocks()
     glGenBuffers(1, &lightUbo);
     glBindBuffer(GL_UNIFORM_BUFFER, lightUbo);
     glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(Eigen::Vector4f), NULL, GL_STATIC_DRAW); // std140 alignment
-    glBindBufferRange(GL_UNIFORM_BUFFER, 1, lightUbo, 0, 2 * sizeof(Eigen::Vector4f));
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, lightUbo);
     
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Eigen::Vector4f), lightPosition.data());
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Eigen::Vector4f), sizeof(Eigen::Vector4f), lightColor.data());
