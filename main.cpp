@@ -215,10 +215,10 @@ void display()
         model.draw(modelShader);
         
         // draw normals
-        if (showNormals) model.draw(normalShader);
+        if (showNormals) model.draw(normalShader, false);
         
         // draw wireframe
-        if (showWireframe) model.draw(wireframeShader);
+        if (showWireframe) model.draw(wireframeShader, false);
     }
     
     // update title

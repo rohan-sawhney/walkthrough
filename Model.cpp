@@ -30,6 +30,20 @@ void Model::cull(Shader& shader)
     }
 }
 
+void Model::enableStates() const
+{
+    glDepthMask(GL_TRUE);
+    glEnable(GL_CULL_FACE);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Model::disableStates(const size_t& index) const
+{
+    if (index == offsetTransparent) glDepthMask(GL_FALSE);
+    if (index == offsetOpen) glDisable(GL_CULL_FACE);
+}
+
 void Model::setMaterialSettings(const Shader& shader, const int& index) const
 {
     static int mIndex = -1;
@@ -58,19 +72,19 @@ void Model::setMaterialSettings(const Shader& shader, const int& index) const
     }
 }
 
-void Model::draw(Shader& shader)
+void Model::draw(Shader& shader, const bool& changeStates)
 {
     shader.use();
     for (size_t i = 0; i < renderMeshes.size(); i++) {
-        if (i == offsetTransparent) glDepthMask(GL_FALSE);
-        if (i == offsetOpen) glDisable(GL_CULL_FACE);
+        if (changeStates) {
+            disableStates(i);
+            setMaterialSettings(shader, renderMeshes[i].mIndex);
+        }
         
-        setMaterialSettings(shader, renderMeshes[i].mIndex);
         renderMeshes[i].draw(cullMeshes[renderMeshes[i].cullIndex].queryCount());
     }
     
-    glDepthMask(GL_TRUE);
-    glEnable(GL_CULL_FACE);
+    enableStates();
 }
 
 void Model::setupTextures()

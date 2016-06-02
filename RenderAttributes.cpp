@@ -52,11 +52,10 @@ void CullMesh::setup()
     
     // bind tbo and set vertex attribute pointers for tbo data
     glGenBuffers(1, &tbo);
-    glBindBuffer(GL_TEXTURE_BUFFER, tbo);
-    glBufferData(GL_TEXTURE_BUFFER, (GLsizei)transforms.size() * sizeof(Eigen::Matrix4f),
+    glBindBuffer(GL_ARRAY_BUFFER, tbo);
+    glBufferData(GL_ARRAY_BUFFER, (GLsizei)transforms.size() * sizeof(Eigen::Matrix4f),
                  &transforms[0], GL_STATIC_DRAW);
     
-    glBindBuffer(GL_ARRAY_BUFFER, tbo);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)0);
     
@@ -70,9 +69,8 @@ void CullMesh::setup()
     glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Matrix4f), (GLvoid*)(3*sizeof(Eigen::Vector4f)));
     
     glGenBuffers(1, &culledTbo);
-    glBindBuffer(GL_TEXTURE_BUFFER, culledTbo);
-    glBufferData(GL_TEXTURE_BUFFER, (GLsizei)transforms.size() * sizeof(Eigen::Matrix4f),
-                 NULL, GL_DYNAMIC_COPY);
+    glBindBuffer(GL_ARRAY_BUFFER, culledTbo);
+    glBufferData(GL_ARRAY_BUFFER, (GLsizei)transforms.size() * sizeof(Eigen::Matrix4f), NULL, GL_DYNAMIC_COPY);
     
     // generate query
     glGenQueries(1, &query);

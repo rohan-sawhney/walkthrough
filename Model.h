@@ -18,7 +18,7 @@ public:
     void cull(Shader& shader);
     
     // draw
-    void draw(Shader& shader);
+    void draw(Shader& shader, const bool& changeStates = true);
     
     // reset
     void reset();
@@ -56,6 +56,12 @@ private:
     
     // setup meshes
     void setupMeshes();
+    
+    // enable depth writing and backface culling
+    void enableStates() const;
+    
+    // disable depth writing and backface culling
+    void disableStates(const size_t& index) const;
     
     // sets material settings
     void setMaterialSettings(const Shader& shader, const int& index) const;
