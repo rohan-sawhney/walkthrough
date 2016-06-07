@@ -515,8 +515,8 @@ void special(int i, int x0, int y0)
 int main(int argc, char** argv)
 {
     // TODO: performance optimizations
-    // 1) occlusion culling
-    // 2) occlusion culling transparency
+    // 1) hi z
+    // 2) hi z transparency
     // 3) minimize CPU GPU sync points
     // 4) lods
     
