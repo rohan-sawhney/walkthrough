@@ -106,6 +106,7 @@ void Skybox::load(const std::string& path)
 void Skybox::draw(Shader& shader) const
 {
     shader.use();
+    glDepthFunc(GL_LEQUAL);
     
     // bind texture
     glActiveTexture(GL_TEXTURE0);

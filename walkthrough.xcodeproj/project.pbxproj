@@ -69,6 +69,7 @@
 		3248790E1CE50454000A11D8 /* BoundingBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BoundingBox.h; sourceTree = "<group>"; };
 		324879211CE5045E000A11D8 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		324879231CE50464000A11D8 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
+		327CC0541D074766000CD016 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = shaders; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,6 +118,7 @@
 				3248790C1CE50454000A11D8 /* Skybox.h */,
 				3248790D1CE50454000A11D8 /* BoundingBox.cpp */,
 				3248790E1CE50454000A11D8 /* BoundingBox.h */,
+				327CC0541D074766000CD016 /* shaders */,
 				324878E81CE5042B000A11D8 /* Products */,
 			);
 			sourceTree = "<group>";

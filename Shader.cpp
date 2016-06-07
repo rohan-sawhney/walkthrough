@@ -1,15 +1,19 @@
 #include "Shader.h"
 #include <fstream>
 
-Shader::Shader()
+Shader::Shader(const std::string& dir0):
+dir(dir0)
 {
     
 }
 
-bool readShaderCode(const std::string& path, std::string& code)
+bool Shader::readShaderCode(const std::string& file, std::string& code)
 {
-    std::ifstream in(path.c_str());
+    std::ifstream in;
+    std::string path;
+    if (file != "") path = dir + file;
     
+    in.open(path.c_str());
     if (in.is_open()) {
         std::stringstream stream;
         stream << in.rdbuf();
@@ -24,14 +28,14 @@ bool readShaderCode(const std::string& path, std::string& code)
     return true;
 }
 
-GLuint compileShader(const std::string& path, GLenum type)
+GLuint Shader::compileShader(const std::string& file, GLenum type)
 {
     GLint success;
     GLchar infoLog[512];
     std::string code;
     GLuint shader = 0;
     
-    if (readShaderCode(path, code)) {
+    if (readShaderCode(file, code)) {
         const GLchar *shaderCode = code.c_str();
         shader = glCreateShader(type);
         glShaderSource(shader, 1, &shaderCode, NULL);
@@ -47,14 +51,14 @@ GLuint compileShader(const std::string& path, GLenum type)
     return shader;
 }
 
-void Shader::setup(const std::string& vertexPath,
-                   const std::string& geometryPath,
-                   const std::string& fragmentPath)
+void Shader::setup(const std::string& vertexFile,
+                   const std::string& geometryFile,
+                   const std::string& fragmentFile)
 {
     // compile shaders
-    vertex = compileShader(vertexPath, GL_VERTEX_SHADER);
-    geometry = compileShader(geometryPath, GL_GEOMETRY_SHADER);
-    fragment = compileShader(fragmentPath, GL_FRAGMENT_SHADER);
+    vertex = compileShader(vertexFile, GL_VERTEX_SHADER);
+    geometry = compileShader(geometryFile, GL_GEOMETRY_SHADER);
+    fragment = compileShader(fragmentFile, GL_FRAGMENT_SHADER);
 
     // create program and attach shaders
     program = glCreateProgram();

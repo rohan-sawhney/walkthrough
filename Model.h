@@ -15,7 +15,7 @@ public:
     bool load(const std::string& path);
     
     // cull
-    void cull(Shader& shader);
+    void cull(Shader& shader, const GLuint& mode);
     
     // draw
     void draw(Shader& shader, const bool& changeStates = true);
@@ -56,12 +56,6 @@ private:
     
     // setup meshes
     void setupMeshes();
-    
-    // enable depth writing and backface culling
-    void enableStates() const;
-    
-    // disable depth writing and backface culling
-    void disableStates(const size_t& index) const;
     
     // sets material settings
     void setMaterialSettings(const Shader& shader, const int& index) const;

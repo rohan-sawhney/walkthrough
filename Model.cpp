@@ -22,26 +22,17 @@ bool Model::load(const std::string& path)
     return false;
 }
 
-void Model::cull(Shader& shader)
+void Model::cull(Shader& shader, const GLuint& mode)
 {
     shader.use();
+    glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &mode);
+    glEnable(GL_RASTERIZER_DISCARD);
+    
     for (size_t i = 0; i < cullMeshes.size(); i++) {
         cullMeshes[i].cull(shader);
     }
-}
-
-void Model::enableStates() const
-{
-    glDepthMask(GL_TRUE);
-    glEnable(GL_CULL_FACE);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void Model::disableStates(const size_t& index) const
-{
-    if (index == offsetTransparent) glDepthMask(GL_FALSE);
-    if (index == offsetOpen) glDisable(GL_CULL_FACE);
+    
+    glDisable(GL_RASTERIZER_DISCARD);
 }
 
 void Model::setMaterialSettings(const Shader& shader, const int& index) const
@@ -64,7 +55,6 @@ void Model::setMaterialSettings(const Shader& shader, const int& index) const
             // bind texture
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, textures[material.tIndex].renderTexture.index);
-            glUniform1i(glGetUniformLocation(shader.program, "tex"), 0);
             glUniform1i(glGetUniformLocation(shader.program, "hasTexture"), 1);
         }
         
@@ -75,16 +65,20 @@ void Model::setMaterialSettings(const Shader& shader, const int& index) const
 void Model::draw(Shader& shader, const bool& changeStates)
 {
     shader.use();
+    glDepthFunc(GL_LESS);
+    
     for (size_t i = 0; i < renderMeshes.size(); i++) {
         if (changeStates) {
-            disableStates(i);
+            if (i == offsetTransparent) glDepthMask(GL_FALSE);
+            if (i == offsetOpen) glDisable(GL_CULL_FACE);
             setMaterialSettings(shader, renderMeshes[i].mIndex);
         }
         
         renderMeshes[i].draw(cullMeshes[renderMeshes[i].cullIndex].queryCount());
     }
     
-    enableStates();
+    glDepthMask(GL_TRUE);
+    glEnable(GL_CULL_FACE);
 }
 
 void Model::setupTextures()

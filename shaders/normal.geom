@@ -6,7 +6,7 @@ in vec3 normal[];
 
 const float MAGNITUDE = 0.2f;
 
-void GenerateLine(int index)
+void generateLine(int index)
 {
     gl_Position = gl_in[index].gl_Position;
     EmitVertex();
@@ -17,7 +17,7 @@ void GenerateLine(int index)
 
 void main()
 {
-    GenerateLine(0); // First vertex normal
-    GenerateLine(1); // Second vertex normal
-    GenerateLine(2); // Third vertex normal
+    generateLine(0);
+    generateLine(1);
+    generateLine(2); 
 }

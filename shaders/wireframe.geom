@@ -6,7 +6,7 @@ in vec3 normal[];
 
 const float OFFSET = 0.002f;
 
-void GenerateLine(int index1, int index2)
+void generateLine(int index1, int index2)
 {
     gl_Position = gl_in[index1].gl_Position + vec4(normal[index1], 0.0f) * OFFSET;
     EmitVertex();
@@ -17,7 +17,7 @@ void GenerateLine(int index1, int index2)
 
 void main()
 {
-    GenerateLine(0, 1);
-    GenerateLine(1, 2); 
-    GenerateLine(2, 0); 
+    generateLine(0, 1);
+    generateLine(1, 2);
+    generateLine(2, 0);
 }
