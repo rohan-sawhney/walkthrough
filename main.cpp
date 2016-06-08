@@ -230,6 +230,7 @@ void init()
     
     glClearColor(0, 0, 0, 0);
     glClearDepth(1.0);
+    glDepthFunc(GL_LEQUAL);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     setupMultisampledFramebuffer();
@@ -444,6 +445,7 @@ void keyboardPressed(unsigned char key, int x0, int y0)
     keys[key] = true;
     
     if (keys[' ']) {
+        mipLevel = 0;
         cullMode = (cullMode + 1) % 3;
         
     } else  if (keys[ESCAPE]) {

@@ -65,8 +65,6 @@ void Model::setMaterialSettings(const Shader& shader, const int& index) const
 void Model::draw(Shader& shader, const bool& changeStates)
 {
     shader.use();
-    glDepthFunc(GL_LESS);
-    
     for (size_t i = 0; i < renderMeshes.size(); i++) {
         if (changeStates) {
             if (i == offsetTransparent) glDepthMask(GL_FALSE);
