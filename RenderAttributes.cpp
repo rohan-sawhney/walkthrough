@@ -178,11 +178,8 @@ void RenderMesh::setup(const GLuint& tbo)
 
 void RenderMesh::draw(const size_t& visibleTransforms) const
 {
-    if (visibleTransforms > 0) {
-        glBindVertexArray(vao);
-        glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT,
-                                0, (GLsizei)visibleTransforms);
-    }
+    glBindVertexArray(vao);
+    glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0, (GLsizei)visibleTransforms);
 }
 
 void RenderMesh::reset()

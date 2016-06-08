@@ -536,7 +536,7 @@ void special(int i, int x0, int y0)
 int main(int argc, char** argv)
 {
     // TODO: performance optimizations
-    // 1) bug fix hiZ -> depth texture from previous frame, transparency
+    // 1) bug fix hiZ -> correctness, transparency, depth texture from previous frame
     // 2) minimize CPU GPU sync points
     // 3) lods
     

@@ -62,17 +62,18 @@ void Model::setMaterialSettings(const Shader& shader, const int& index) const
     }
 }
 
-void Model::draw(Shader& shader, const bool& changeStates)
+void Model::draw(Shader& shader, const bool& useMaterials)
 {
     shader.use();
     for (size_t i = 0; i < renderMeshes.size(); i++) {
-        if (changeStates) {
-            if (i == offsetTransparent) glDepthMask(GL_FALSE);
-            if (i == offsetOpen) glDisable(GL_CULL_FACE);
-            setMaterialSettings(shader, renderMeshes[i].mIndex);
-        }
+        if (i == offsetTransparent) glDepthMask(GL_FALSE);
+        if (i == offsetOpen) glDisable(GL_CULL_FACE);
         
-        renderMeshes[i].draw(cullMeshes[renderMeshes[i].cullIndex].queryCount());
+        int visibleTransforms = cullMeshes[renderMeshes[i].cullIndex].queryCount();
+        if (visibleTransforms > 0) {
+            if (useMaterials) setMaterialSettings(shader, renderMeshes[i].mIndex);
+            renderMeshes[i].draw(visibleTransforms);
+        }
     }
     
     glDepthMask(GL_TRUE);

@@ -18,7 +18,7 @@ public:
     void cull(Shader& shader, const GLuint& mode);
     
     // draw
-    void draw(Shader& shader, const bool& changeStates = true);
+    void draw(Shader& shader, const bool& useMaterials = true);
     
     // reset
     void reset();
