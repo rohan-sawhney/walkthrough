@@ -321,6 +321,8 @@ void createHiZMap()
 
 void drawScreen()
 {
+    glDisable(GL_DEPTH_TEST);
+    
     if (showDepth) {
         depthShader.use();
         glActiveTexture(GL_TEXTURE0);
@@ -334,6 +336,7 @@ void drawScreen()
     
     glBindVertexArray(screenVao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void updateTitle()
@@ -355,43 +358,48 @@ void updateTitle()
 
 void display()
 {
-    // update uniform blocks
-    updateUniformBlocks();
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-        
-    // draw skybox
-    skybox.draw(skyboxShader);
-    
     if (success) {
+        // update uniform blocks
+        updateUniformBlocks();
+    
+        // create hiZ map
+        if (cullMode == OCCLUSION_CULLING) {
+            glBindFramebuffer(GL_FRAMEBUFFER, screenFbo);
+            createHiZMap();
+        }
+    
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
         // cull
-        if (cullMode == OCCLUSION_CULLING) createHiZMap();
         model.cull(cullShader, subroutineIndex[cullMode]);
         
         // draw model
         model.draw(modelShader);
         if (showNormals) model.draw(normalShader, false);
         if (showWireframe) model.draw(wireframeShader, false);
-    }
+        
+        // draw skybox
+        skybox.draw(skyboxShader);
     
-    // blit multisampled buffer to normal color buffer
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, screenFbo);
-    glBlitFramebuffer(0, 0, gridX, gridY, 0, 0, gridX, gridY, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        // blit multisampled buffer to normal color buffer
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, screenFbo);
+        glBlitFramebuffer(0, 0, gridX, gridY, 0, 0, gridX, gridY,
+                          GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        // NOTE: not able to blit depth buffer for unknown reason
     
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
-    
-    // draw screen
-    drawScreen();
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        // draw screen
+        drawScreen();
 
-    // update title
-    updateTitle();
+        // update title
+        updateTitle();
     
-    glutSwapBuffers();
+        glutSwapBuffers();
+    }
 }
 
 void idle()
@@ -515,8 +523,8 @@ void special(int i, int x0, int y0)
 int main(int argc, char** argv)
 {
     // TODO: performance optimizations
-    // 1) hi z
-    // 2) hi z transparency
+    // 1) hiZ
+    // 2) hiZ transparency
     // 3) minimize CPU GPU sync points
     // 4) lods
     
