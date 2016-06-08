@@ -9,6 +9,7 @@
 #define ESCAPE 27
 #define MSEC_TO_SEC 1000.0
 #define MAX_SAMPLES 4
+#define NO_CULLING 0
 #define FRUSTUM_CULLING 1
 #define OCCLUSION_CULLING 2
 
@@ -41,10 +42,11 @@ int elapsedTime = 0;
 int baseTime = 0;
 int lastTime = 0;
 int cullMode = FRUSTUM_CULLING;
+float mipLevel = 0;
 float dt = 0.0;
+float lastX = 0.0, lastY = 0.0;
 bool keys[256];
 bool firstMouse = true;
-float lastX = 0.0, lastY = 0.0;
 
 GLuint subroutineIndex[3];
 GLuint transformUbo;
@@ -214,6 +216,7 @@ void printInstructions()
               << "b: toggle vertex normals\n"
               << "n: toggle wireframe\n"
               << "m: toggle depth\n"
+              << "o/p: increment/decrement mip level\n"
               << "escape: exit program\n"
               << std::endl;
 }
@@ -325,6 +328,7 @@ void drawScreen()
     
     if (showDepth) {
         depthShader.use();
+        glUniform1f(glGetUniformLocation(depthShader.program, "mipLevel"), mipLevel);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, screenDepthTexture);
     
@@ -348,8 +352,9 @@ void updateTitle()
     
     if (elapsedTime - baseTime > MSEC_TO_SEC) {
         std::string title = "FPS = " + std::to_string(frame * MSEC_TO_SEC / (elapsedTime - baseTime)) +
-                            ", Cull Mode =  " + (cullMode == 0 ? "No Culling" :
-                                                (cullMode == 1 ? "Frustum" : "Frustum + Occlusion"));
+                            ", Cull Mode =  " + (cullMode == NO_CULLING ? "No Culling" :
+                                                (cullMode == FRUSTUM_CULLING ? "Frustum" : "Frustum + Occlusion"));
+        if (showDepth && cullMode == OCCLUSION_CULLING) title += (", Mip Level: " + std::to_string((int)mipLevel));
         glutSetWindowTitle(title.c_str());
         baseTime = elapsedTime;
         frame = 0;
@@ -471,6 +476,12 @@ void keyboardPressed(unsigned char key, int x0, int y0)
         
     } else if (keys['m']) {
         showDepth = !showDepth;
+    
+    } else if (keys['o']) {
+        if (showDepth && cullMode == OCCLUSION_CULLING && mipLevel > 0) mipLevel--;
+    
+    } else if (keys['p']) {
+        if (showDepth && cullMode == OCCLUSION_CULLING && mipLevel < floorf(log2f(fmaxf(gridX, gridY)))) mipLevel++;
     }
 }
 
@@ -523,10 +534,9 @@ void special(int i, int x0, int y0)
 int main(int argc, char** argv)
 {
     // TODO: performance optimizations
-    // 1) hiZ
-    // 2) hiZ transparency
-    // 3) minimize CPU GPU sync points
-    // 4) lods
+    // 1) bug fix hiZ -> depth texture from previous frame, transparency
+    // 2) minimize CPU GPU sync points
+    // 3) lods
     
     // TODO: graphics
     // 1) weighted average transparency
@@ -544,7 +554,7 @@ int main(int argc, char** argv)
     glutInitWindowSize(gridX, gridY);
     
     std::stringstream title;
-    title << "FPS = N/A";
+    title << "FPS = N/A, Cull Mode = FRUSTUM";
     glutCreateWindow(title.str().c_str());
     
     init();
