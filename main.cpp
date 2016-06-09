@@ -125,14 +125,14 @@ void setupTransformFeedback(const GLuint& program)
 
 void initShaders()
 {
-    skyboxShader.setup("skybox.vert", "", "skybox.frag"); skyboxShader.link();
-    hiZShader.setup("screen.vert", "", "hi-z.frag"); hiZShader.link();
-    cullShader.setup("cull.vert", "cull.geom", ""); setupTransformFeedback(cullShader.program); cullShader.link();
-    modelShader.setup("model.vert", "", "model.frag"); modelShader.link();
-    normalShader.setup("normal.vert", "normal.geom", "normal.frag"); normalShader.link();
-    wireframeShader.setup("normal.vert", "wireframe.geom", "wireframe.frag"); wireframeShader.link();
-    depthShader.setup("screen.vert", "", "depth.frag"); depthShader.link();
-    screenShader.setup("screen.vert", "", "screen.frag"); screenShader.link();
+    skyboxShader.setup("Skybox.vert", "", "Skybox.frag"); skyboxShader.link();
+    hiZShader.setup("Screen.vert", "", "Hi-z.frag"); hiZShader.link();
+    cullShader.setup("Cull.vert", "Cull.geom", ""); setupTransformFeedback(cullShader.program); cullShader.link();
+    modelShader.setup("Model.vert", "", "Model.frag"); modelShader.link();
+    normalShader.setup("Normal.vert", "Normal.geom", "Normal.frag"); normalShader.link();
+    wireframeShader.setup("Normal.vert", "Wireframe.geom", "Wireframe.frag"); wireframeShader.link();
+    depthShader.setup("Screen.vert", "", "Depth.frag"); depthShader.link();
+    screenShader.setup("Screen.vert", "", "Screen.frag"); screenShader.link();
 }
 
 void setUniformBlocks()
