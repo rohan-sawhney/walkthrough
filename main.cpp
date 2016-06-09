@@ -216,7 +216,7 @@ void printInstructions()
               << "b: toggle vertex normals\n"
               << "n: toggle wireframe\n"
               << "m: toggle depth\n"
-              << "o/p: increment/decrement mip level\n"
+              << "o/p: increment/decrement depth map mip level\n"
               << "escape: exit program\n"
               << std::endl;
 }
@@ -352,12 +352,11 @@ void updateTitle()
     lastTime = elapsedTime;
     
     if (elapsedTime - baseTime > MSEC_TO_SEC) {
-        std::string title = "FPS: " + std::to_string(frame * MSEC_TO_SEC / (elapsedTime - baseTime)) + "\t" +
-                            "Cull Mode: " + (cullMode == NONE ? "No Culling" :
-                                            (cullMode == FRUSTUM ? "Frustum" : "Occlusion")) + "\t";
-        
-        if (showDepth && cullMode == OCCLUSION) title += ("Mip Level: " + std::to_string((int)mipLevel) + "\t");
-        title += ("Cull Ratio: " + std::to_string(model.cullRatio()));
+        std::string title = "Fps: " + std::to_string(frame * MSEC_TO_SEC / (elapsedTime - baseTime)) +
+                            "    Cull Mode: " + (cullMode == NONE ? "None" :
+                                                (cullMode == FRUSTUM ? "Frustum" : "Occlusion")) +
+                            "    Cull Ratio: " + std::to_string(model.cullRatio());
+        if (showDepth && cullMode == OCCLUSION) title += ("    Mip Level: " + std::to_string((int)mipLevel));
         
         glutSetWindowTitle(title.c_str());
         baseTime = elapsedTime;
@@ -559,7 +558,7 @@ int main(int argc, char** argv)
     glutInitWindowSize(gridX, gridY);
     
     std::stringstream title;
-    title << "FPS = N/A, Cull Mode = FRUSTUM";
+    title << ("Fps: N/A    Cull Mode: Frustum    Cull Ratio: " + std::to_string(model.cullRatio()));
     glutCreateWindow(title.str().c_str());
     
     init();
