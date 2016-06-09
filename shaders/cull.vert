@@ -66,6 +66,7 @@ int hiZOcclusionCulling()
     // perform perspective division for the bounding box
     for (int i = 0; i < 8; i++) bbox[i].xyz /= bbox[i].w;
     
+    // TODO: ndc -> screen bug
     // calculate screen space bounding rectangle
     vec2 boundingRect[2];
     boundingRect[0].x = min(min(min(bbox[0].x, bbox[1].x),
@@ -95,8 +96,8 @@ int hiZOcclusionCulling()
                                   min(bbox[6].z, bbox[7].z)));
     
     // calculate the bounding rectangle size in viewport coordinates
-    float viewSizeX = (boundingRect[1].x - boundingRect[0].x) * viewport.y;
-    float viewSizeY = (boundingRect[1].y - boundingRect[0].y) * viewport.z;
+    float viewSizeX = (boundingRect[1].x - boundingRect[0].x) * viewport.z;
+    float viewSizeY = (boundingRect[1].y - boundingRect[0].y) * viewport.w;
     
     // calculate the texture LOD used for lookup in the depth buffer texture
     float lod = ceil(log2(max(viewSizeX, viewSizeY) / 2.0));
