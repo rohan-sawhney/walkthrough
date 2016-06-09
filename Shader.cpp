@@ -11,7 +11,7 @@ bool Shader::readShaderCode(const std::string& file, std::string& code)
 {
     std::ifstream in;
     std::string path;
-    if (file != "") path = dir + file;
+    if (!file.empty()) path = dir + file;
     
     in.open(path.c_str());
     if (in.is_open()) {

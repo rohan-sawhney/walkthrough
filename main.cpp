@@ -1,10 +1,10 @@
-#include "Camera.h"
-#include "Model.h"
-#include "SkyBox.h"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "Model.h"
+#include "SkyBox.h"
+#include "Camera.h"
 
 #define ESCAPE 27
 #define MSEC_TO_SEC 1000.0
@@ -152,11 +152,11 @@ void setUniformBlocks()
     glUniformBlockBinding(skyboxShader.program, skyboxShaderIndex, 0);
     
     // add transform data
-    glm::vec4 viewport = glm::vec4(0.f, 0.f, gridX, gridY);
+    glm::vec2 viewport = glm::vec2(gridX, gridY);
     glGenBuffers(1, &transformUbo);
     glBindBuffer(GL_UNIFORM_BUFFER, transformUbo);
-    glBufferData(GL_UNIFORM_BUFFER, 2*sizeof(glm::mat4) + sizeof(glm::vec4), NULL, GL_DYNAMIC_DRAW);
-    glBufferSubData(GL_UNIFORM_BUFFER, 2*sizeof(glm::mat4), sizeof(glm::vec4), glm::value_ptr(viewport));
+    glBufferData(GL_UNIFORM_BUFFER, 2*sizeof(glm::mat4) + sizeof(glm::vec2), NULL, GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_UNIFORM_BUFFER, 2*sizeof(glm::mat4), sizeof(glm::vec2), glm::value_ptr(viewport));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, transformUbo);
     
@@ -543,9 +543,9 @@ int main(int argc, char** argv)
     // 3) lods
     
     // TODO: graphics
-    // 1) weighted average transparency
-    // 2) shadows
-    // 3) ssao
+    // 1) shadows
+    // 2) ssao
+    // 3) weighted average transparency
     // 4) normal mapping
     // 5) parallex mapping
     // 6) hdr

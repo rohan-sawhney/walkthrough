@@ -2,7 +2,7 @@
 layout (std140) uniform Transform {
     mat4 projection;
     mat4 view;
-    vec4 viewport;
+    vec2 viewport;
 };
 
 layout (location = 0) in mat4 model;
@@ -66,7 +66,6 @@ int hiZOcclusionCulling()
     // perform perspective division for the bounding box
     for (int i = 0; i < 8; i++) bbox[i].xyz /= bbox[i].w;
     
-    // TODO: ndc -> screen bug
     // calculate screen space bounding rectangle
     vec2 boundingRect[2];
     boundingRect[0].x = min(min(min(bbox[0].x, bbox[1].x),
@@ -96,11 +95,11 @@ int hiZOcclusionCulling()
                                   min(bbox[6].z, bbox[7].z)));
     
     // calculate the bounding rectangle size in viewport coordinates
-    float viewSizeX = (boundingRect[1].x - boundingRect[0].x) * viewport.z;
-    float viewSizeY = (boundingRect[1].y - boundingRect[0].y) * viewport.w;
+    float viewSizeX = (boundingRect[1].x - boundingRect[0].x) * viewport.x;
+    float viewSizeY = (boundingRect[1].y - boundingRect[0].y) * viewport.y;
     
     // calculate the texture LOD used for lookup in the depth buffer texture
-    float lod = ceil(log2(max(viewSizeX, viewSizeY) / 2.0));
+    float lod = ceil(log2(max(viewSizeX, viewSizeY) / 2.0)); // TODO: Incorrect?
     
     // fetch the depth texture using explicit LOD lookups
     vec4 samples;
