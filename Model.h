@@ -20,6 +20,9 @@ public:
     // draw
     void draw(Shader& shader, const bool& useMaterials = true);
     
+    // returns cull ratio
+    float cullRatio();
+    
     // reset
     void reset();
     
@@ -68,6 +71,8 @@ private:
     std::vector<Texture> textures;
     size_t offsetTransparent;
     size_t offsetOpen;
+    float drawCalls;
+    float maxDrawCalls;
 };
 
 #endif

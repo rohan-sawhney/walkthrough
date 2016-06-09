@@ -64,6 +64,8 @@ void Model::setMaterialSettings(const Shader& shader, const int& index) const
 
 void Model::draw(Shader& shader, const bool& useMaterials)
 {
+    drawCalls = 0;
+    
     shader.use();
     for (size_t i = 0; i < renderMeshes.size(); i++) {
         if (i == offsetTransparent) glDepthMask(GL_FALSE);
@@ -74,10 +76,17 @@ void Model::draw(Shader& shader, const bool& useMaterials)
             if (useMaterials) setMaterialSettings(shader, renderMeshes[i].mIndex);
             renderMeshes[i].draw(visibleTransforms);
         }
+        
+        drawCalls += visibleTransforms;
     }
     
     glDepthMask(GL_TRUE);
     glEnable(GL_CULL_FACE);
+}
+
+float Model::cullRatio()
+{
+    return drawCalls / maxDrawCalls;
 }
 
 void Model::setupTextures()
@@ -208,7 +217,9 @@ void Model::setupCullMeshes()
 void Model::setupRenderMeshes()
 {
     for (size_t i = 0; i < renderMeshes.size(); i++) {
-        renderMeshes[i].setup(cullMeshes[renderMeshes[i].cullIndex].culledTbo);
+        int idx = renderMeshes[i].cullIndex;
+        maxDrawCalls += cullMeshes[idx].transforms.size();
+        renderMeshes[i].setup(cullMeshes[idx].culledTbo);
     }
 }
 

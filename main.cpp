@@ -9,9 +9,9 @@
 #define ESCAPE 27
 #define MSEC_TO_SEC 1000.0
 #define MAX_SAMPLES 4
-#define NO_CULLING 0
-#define FRUSTUM_CULLING 1
-#define OCCLUSION_CULLING 2
+#define NONE 0
+#define FRUSTUM 1
+#define OCCLUSION 2
 
 const std::vector<std::string> paths = {"/Users/rohansawhney/Desktop/developer/C++/walkthrough/loft/loft.txt",
                                         "/Users/rohansawhney/Desktop/developer/C++/walkthrough/campus/campus.txt"};
@@ -41,7 +41,7 @@ int frame = 0;
 int elapsedTime = 0;
 int baseTime = 0;
 int lastTime = 0;
-int cullMode = FRUSTUM_CULLING;
+int cullMode = FRUSTUM;
 float mipLevel = 0;
 float dt = 0.0;
 float lastX = 0.0, lastY = 0.0;
@@ -352,10 +352,13 @@ void updateTitle()
     lastTime = elapsedTime;
     
     if (elapsedTime - baseTime > MSEC_TO_SEC) {
-        std::string title = "FPS = " + std::to_string(frame * MSEC_TO_SEC / (elapsedTime - baseTime)) +
-                            ", Cull Mode =  " + (cullMode == NO_CULLING ? "No Culling" :
-                                                (cullMode == FRUSTUM_CULLING ? "Frustum" : "Frustum + Occlusion"));
-        if (showDepth && cullMode == OCCLUSION_CULLING) title += (", Mip Level: " + std::to_string((int)mipLevel));
+        std::string title = "FPS: " + std::to_string(frame * MSEC_TO_SEC / (elapsedTime - baseTime)) + "\t" +
+                            "Cull Mode: " + (cullMode == NONE ? "No Culling" :
+                                            (cullMode == FRUSTUM ? "Frustum" : "Occlusion")) + "\t";
+        
+        if (showDepth && cullMode == OCCLUSION) title += ("Mip Level: " + std::to_string((int)mipLevel) + "\t");
+        title += ("Cull Ratio: " + std::to_string(model.cullRatio()));
+        
         glutSetWindowTitle(title.c_str());
         baseTime = elapsedTime;
         frame = 0;
@@ -369,7 +372,7 @@ void display()
         updateUniformBlocks();
     
         // create hiZ map
-        if (cullMode == OCCLUSION_CULLING) {
+        if (cullMode == OCCLUSION) {
             glBindFramebuffer(GL_FRAMEBUFFER, screenFbo);
             createHiZMap();
         }
@@ -480,10 +483,10 @@ void keyboardPressed(unsigned char key, int x0, int y0)
         showDepth = !showDepth;
     
     } else if (keys['o']) {
-        if (showDepth && cullMode == OCCLUSION_CULLING && mipLevel > 0) mipLevel--;
+        if (showDepth && cullMode == OCCLUSION && mipLevel > 0) mipLevel--;
     
     } else if (keys['p']) {
-        if (showDepth && cullMode == OCCLUSION_CULLING && mipLevel < floorf(log2f(fmaxf(gridX, gridY)))) mipLevel++;
+        if (showDepth && cullMode == OCCLUSION && mipLevel < floorf(log2f(fmaxf(gridX, gridY)))) mipLevel++;
     }
 }
 
