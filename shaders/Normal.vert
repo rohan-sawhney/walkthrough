@@ -8,6 +8,7 @@ out vec3 normal;
 layout (std140) uniform Transform {
     mat4 projection;
     mat4 view;
+    vec2 viewport;
 };
 
 void main()

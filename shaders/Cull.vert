@@ -99,7 +99,7 @@ int hiZOcclusionCulling()
     float viewSizeY = (boundingRect[1].y - boundingRect[0].y) * viewport.y;
     
     // calculate the texture LOD used for lookup in the depth buffer texture
-    float lod = ceil(log2(max(viewSizeX, viewSizeY) / 2.0)); // TODO: Incorrect?
+    float lod = ceil(log2(max(viewSizeX, viewSizeY) / 2.0)); // BUG
     
     // fetch the depth texture using explicit LOD lookups
     vec4 samples;

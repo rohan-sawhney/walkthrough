@@ -11,6 +11,7 @@ out vec2 texCoords;
 layout (std140) uniform Transform {
     mat4 projection;
     mat4 view;
+    vec2 viewport;
 };
 
 void main()
