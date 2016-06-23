@@ -17,21 +17,16 @@ uniform int hasTexture;
 
 void main()
 {
-    // ambient
-    float ambientStrength = 0.4f;
-    
     // diffuse
-    float diffuseStrength = 1.0f;
     vec3 lightDirection = normalize(light.position - fragPosition);
     float diff = max(dot(normal, lightDirection), 0.0);
     
     // specular
-    float specularStrength = 0.5f;
     vec3 viewDirection = normalize(viewPosition - fragPosition);
     vec3 halfwayDirection = normalize(lightDirection + viewDirection);
     float spec = pow(max(dot(normal, halfwayDirection), 0.0), 32);
     
-    float strength = ambientStrength + diffuseStrength * diff + specularStrength * spec;
+    float strength = 0.3f + 0.8f*diff + 0.3f*spec;
     
     color = vec4(strength * light.color, 1.0f) * objectColor;
     if (hasTexture == 1) color = color * texture(tex, texCoords);
