@@ -1,7 +1,3 @@
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "Model.h"
 #include "SkyBox.h"
 #include "Camera.h"
@@ -13,10 +9,10 @@
 #define FRUSTUM 1
 #define OCCLUSION 2
 
-const std::vector<std::string> paths = {"/Users/rohansawhney/Desktop/developer/C++/walkthrough/loft/loft.txt",
-                                        "/Users/rohansawhney/Desktop/developer/C++/walkthrough/campus/campus.txt"};
-const std::string skyboxPath = "/Users/rohansawhney/Desktop/developer/C++/walkthrough/skybox/";
-const std::string shaderPath = "/Users/rohansawhney/Desktop/developer/C++/walkthrough/shaders/";
+const std::string path = "/Users/rohansawhney/Desktop/developer/C++/walkthrough";
+const std::vector<std::string> paths = {path + "/loft/loft.txt", path + "/campus/campus.txt"};
+const std::string skyboxPath = path + "/skybox/";
+const std::string shaderPath = path + "/shaders/";
 
 int gridX = 800;
 int gridY = 600;
@@ -152,11 +148,12 @@ void setUniformBlocks()
     glUniformBlockBinding(skyboxShader.program, skyboxShaderIndex, 0);
     
     // add transform data
-    glm::vec2 viewport = glm::vec2(gridX, gridY);
+    Eigen::Vector2f viewport(gridX, gridY);
     glGenBuffers(1, &transformUbo);
     glBindBuffer(GL_UNIFORM_BUFFER, transformUbo);
-    glBufferData(GL_UNIFORM_BUFFER, 2*sizeof(glm::mat4) + sizeof(glm::vec2), NULL, GL_DYNAMIC_DRAW);
-    glBufferSubData(GL_UNIFORM_BUFFER, 2*sizeof(glm::mat4), sizeof(glm::vec2), glm::value_ptr(viewport));
+    glBufferData(GL_UNIFORM_BUFFER, 2*sizeof(Eigen::Matrix4f)+sizeof(Eigen::Vector2f), NULL,
+                 GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_UNIFORM_BUFFER, 2*sizeof(Eigen::Matrix4f), sizeof(Eigen::Vector2f), &viewport);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, transformUbo);
     
@@ -253,16 +250,12 @@ void init()
 
 void updateUniformBlocks()
 {
-    // compute and set transformation matrices
-    glm::mat4 projectionMatrix = glm::perspective(camera.fov, (float)gridX/(float)gridY, clipNear, clipFar);
-    Eigen::Vector3f center = camera.pos + camera.dir;
-    glm::mat4 viewMatrix = glm::lookAt(glm::vec3(camera.pos.x(), camera.pos.y(), camera.pos.z()),
-                                       glm::vec3(center.x(), center.y(), center.z()),
-                                       glm::vec3(camera.up.x(), camera.up.y(), camera.up.z()));
-    
+    // set transformation matrices
     glBindBuffer(GL_UNIFORM_BUFFER, transformUbo);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projectionMatrix));
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(viewMatrix));
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4),
+                    glm::value_ptr(camera.projectionMatrix(gridX, gridY, clipNear, clipFar)));
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4),
+                    glm::value_ptr(camera.viewMatrix()));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     
     // set view position
@@ -550,7 +543,7 @@ int main(int argc, char** argv)
     // 5) parallex mapping
     // 6) hdr
     // 7) bloom
-    // 8) deferred shading
+    // 8) deferred rendering
     
     InitializeMagick(*argv);
     glutInit(&argc, argv);

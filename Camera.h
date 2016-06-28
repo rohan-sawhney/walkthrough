@@ -2,6 +2,9 @@
 #define CAMERA_H
 
 #include "Types.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 enum CameraMovement {
     FORWARD,
@@ -27,6 +30,12 @@ public:
     
     // process scroll
     void processScroll(const float& scroll);
+    
+    // returns projection matrix
+    glm::mat4 projectionMatrix(float x, float y, float near, float far);
+    
+    // returns view matrix
+    glm::mat4 viewMatrix();
     
     // member variables
     Eigen::Vector3f pos;

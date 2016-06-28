@@ -71,7 +71,7 @@ void Model::draw(Shader& shader, const bool& useMaterials)
         if (i == offsetTransparent) glDepthMask(GL_FALSE);
         if (i == offsetOpen) glDisable(GL_CULL_FACE);
         
-        int visibleTransforms = cullMeshes[renderMeshes[i].cullIndex].queryCount();
+        int visibleTransforms = cullMeshes[renderMeshes[i].instanceId].queryCount();
         if (visibleTransforms > 0) {
             if (useMaterials) setMaterialSettings(shader, renderMeshes[i].mIndex);
             renderMeshes[i].draw(visibleTransforms);
@@ -217,7 +217,7 @@ void Model::setupCullMeshes()
 void Model::setupRenderMeshes()
 {
     for (size_t i = 0; i < renderMeshes.size(); i++) {
-        int idx = renderMeshes[i].cullIndex;
+        const int& idx(renderMeshes[i].instanceId);
         maxDrawCalls += cullMeshes[idx].transforms.size();
         renderMeshes[i].setup(cullMeshes[idx].culledTbo);
     }

@@ -120,8 +120,8 @@ void CullMesh::reset()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RenderMesh::RenderMesh(const int& cullIndex0, const int& mIndex0, const bool& closed0):
-cullIndex(cullIndex0),
+RenderMesh::RenderMesh(const int& instanceId0, const int& mIndex0, const bool& closed0):
+instanceId(instanceId0),
 mIndex(mIndex0),
 closed(closed0)
 {

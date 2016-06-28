@@ -58,6 +58,19 @@ void Camera::processScroll(const float& scroll)
     else if (fov > MAX_FOV) fov = MAX_FOV;
 }
 
+glm::mat4 Camera::projectionMatrix(float x, float y, float near, float far)
+{
+    return glm::perspective(fov, x/y, near, far);
+}
+
+glm::mat4 Camera::viewMatrix()
+{
+    Eigen::Vector3f center = pos + dir;
+    return glm::lookAt(glm::vec3(pos.x(), pos.y(), pos.z()),
+                       glm::vec3(center.x(), center.y(), center.z()),
+                       glm::vec3(up.x(), up.y(), up.z()));
+}
+
 void Camera::updateDirection()
 {
     dir.x() = cos(yaw * DEG_TO_RAD) * cos(pitch * DEG_TO_RAD);

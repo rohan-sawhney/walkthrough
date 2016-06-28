@@ -58,7 +58,7 @@ private:
 class RenderMesh {
 public:
     // constructor
-    RenderMesh(const int& cullIndex0, const int& mIndex0, const bool& closed0);
+    RenderMesh(const int& instanceId0, const int& mIndex0, const bool& closed0);
     
     // set up
     void setup(const GLuint& tbo);
@@ -72,7 +72,7 @@ public:
     // member variables
     std::vector<RenderVertex> vertices;
     std::vector<GLuint> indices;
-    int cullIndex;
+    int instanceId;
     int mIndex;
     bool closed;
 
