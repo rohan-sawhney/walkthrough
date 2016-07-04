@@ -8,6 +8,8 @@
 #define NONE 0
 #define FRUSTUM 1
 #define OCCLUSION 2
+#define DIGIT_OFFSET 48
+#define MAX_ANGLE 180.0
 
 const std::string path = "/Users/rohansawhney/Desktop/developer/C++/walkthrough";
 const std::vector<std::string> paths = {path + "/loft/loft.txt", path + "/campus/campus.txt"};
@@ -16,8 +18,6 @@ const std::string shaderPath = path + "/shaders/";
 
 int gridX = 800;
 int gridY = 600;
-const float clipNear = 0.1;
-const float clipFar = 1000;
 
 Model model;
 Skybox skybox;
@@ -54,7 +54,10 @@ GLuint screenFbo;
 GLuint screenColorTexture;
 GLuint screenDepthTexture;
 
-const Eigen::Vector3f lightPosition(0.0, 30.0, 30.0);
+double angleX = 0.0;
+double angleZ = 0.0;
+Eigen::Vector3f lightDirection(0.0, -1.0, 0.0);
+const Eigen::Vector3f lightPosition(0.0, 50.0, 0.0);
 const Eigen::Vector3f lightColor(1.0, 1.0, 1.0);
 
 bool success = true;
@@ -253,7 +256,7 @@ void updateUniformBlocks()
     // set transformation matrices
     glBindBuffer(GL_UNIFORM_BUFFER, transformUbo);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4),
-                    glm::value_ptr(camera.projectionMatrix(gridX, gridY, clipNear, clipFar)));
+                    glm::value_ptr(camera.projectionMatrix(gridX, gridY)));
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4),
                     glm::value_ptr(camera.viewMatrix()));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -449,13 +452,13 @@ void keyboardPressed(unsigned char key, int x0, int y0)
         
     } else if (keys['a']) {
         camera.processKeyboard(LEFT, dt);
-    
+        
     } else if (keys['d']) {
         camera.processKeyboard(RIGHT, dt);
-    
+        
     } else if (keys['w']) {
         camera.processKeyboard(FORWARD, dt);
-    
+        
     } else if (keys['s']) {
         camera.processKeyboard(BACKWARD, dt);
         
@@ -465,20 +468,32 @@ void keyboardPressed(unsigned char key, int x0, int y0)
     } else if (keys['q']) {
         camera.processKeyboard(DOWN, dt);
         
-    } else if (keys['b']) {
-        showNormals = !showNormals;
-    
-    } else if (keys['n']) {
-        showWireframe = !showWireframe;
-        
-    } else if (keys['m']) {
-        showDepth = !showDepth;
-    
     } else if (keys['o']) {
         if (showDepth && cullMode == OCCLUSION && mipLevel > 0) mipLevel--;
-    
+        
     } else if (keys['p']) {
         if (showDepth && cullMode == OCCLUSION && mipLevel < floorf(log2f(fmaxf(gridX, gridY)))) mipLevel++;
+        
+    } else if (keys['k']) {
+        p--;
+        if (p < 0) p = (int)paths.size()-1;
+        model.reset();
+        success = model.load(paths[p]);
+        
+    } else if (keys['l']) {
+        p++;
+        if (p == (int)paths.size()) p = 0;
+        model.reset();
+        success = model.load(paths[p]);
+        
+    } else if (keys[DIGIT_OFFSET + 1]) {
+        showNormals = !showNormals;
+        
+    } else if (keys[DIGIT_OFFSET + 2]) {
+        showWireframe = !showWireframe;
+        
+    } else if (keys[DIGIT_OFFSET + 3]) {
+        showDepth = !showDepth;
     }
 }
 
@@ -504,28 +519,37 @@ void mouse(int x, int y)
     camera.processMouse(dx, dy);
 }
 
+void rotateLightDir()
+{
+    Eigen::Matrix3f rotZ, rotX;
+    rotZ << cos(angleX*DEG_TO_RAD), -sin(angleX*DEG_TO_RAD), 0,
+    sin(angleX*DEG_TO_RAD), cos(angleX*DEG_TO_RAD), 0,
+    0, 0, 1;
+    rotX << 1, 0, 0,
+    0, cos(angleZ*DEG_TO_RAD), -sin(angleZ*DEG_TO_RAD),
+    0, sin(angleZ*DEG_TO_RAD), cos(angleZ*DEG_TO_RAD);
+    
+    lightDirection = rotZ * rotX * Eigen::Vector3f(0, -1, 0);
+}
+
 void special(int i, int x0, int y0)
 {
     switch (i) {
         case GLUT_KEY_UP:
-            camera.processScroll(1.0);
+            if (angleX < MAX_ANGLE) angleX += 1.0;
             break;
         case GLUT_KEY_DOWN:
-            camera.processScroll(-1.0);
+            if (angleX > -MAX_ANGLE) angleX -= 1.0;
             break;
         case GLUT_KEY_LEFT:
-            p--;
-            if (p < 0) p = (int)paths.size()-1;
-            model.reset();
-            success = model.load(paths[p]);
+            if (angleZ > -MAX_ANGLE) angleZ -= 1.0;
             break;
         case GLUT_KEY_RIGHT:
-            p++;
-            if (p == (int)paths.size()) p = 0;
-            model.reset();
-            success = model.load(paths[p]);
+            if (angleZ < MAX_ANGLE) angleZ += 1.0;
             break;
     }
+    
+    rotateLightDir();
 }
 
 int main(int argc, char** argv)
@@ -537,13 +561,13 @@ int main(int argc, char** argv)
     
     // TODO: graphics
     // 1) shadows
-    // 2) ssao
-    // 3) weighted average transparency
-    // 4) normal mapping
-    // 5) parallex mapping
-    // 6) hdr
-    // 7) bloom
-    // 8) deferred rendering
+    // 2) normal mapping
+    // 3) parallex mapping
+    // 4) hdr
+    // 5) bloom
+    // 6) deferred rendering
+    // 7) ssao
+    // 8) weighted average transparency
     
     InitializeMagick(*argv);
     glutInit(&argc, argv);
@@ -551,7 +575,7 @@ int main(int argc, char** argv)
     glutInitWindowSize(gridX, gridY);
     
     std::stringstream title;
-    title << ("Fps: N/A    Cull Mode: Frustum    Cull Ratio: " + std::to_string(model.cullRatio()));
+    title << ("Fps: N/A    Shadows: On    Cull Mode: Frustum    Cull Ratio: 1.0");
     glutCreateWindow(title.str().c_str());
     
     init();

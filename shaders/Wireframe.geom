@@ -4,13 +4,13 @@ layout (line_strip, max_vertices = 6) out;
 
 in vec3 normal[];
 
-const float OFFSET = 0.002f;
+const float OFFSET = 0.002;
 
 void generateLine(int index1, int index2)
 {
-    gl_Position = gl_in[index1].gl_Position + vec4(normal[index1], 0.0f) * OFFSET;
+    gl_Position = gl_in[index1].gl_Position + vec4(normal[index1], 0.0) * OFFSET;
     EmitVertex();
-    gl_Position = gl_in[index2].gl_Position + vec4(normal[index2], 0.0f) * OFFSET;
+    gl_Position = gl_in[index2].gl_Position + vec4(normal[index2], 0.0) * OFFSET;
     EmitVertex();
     EndPrimitive();
 }

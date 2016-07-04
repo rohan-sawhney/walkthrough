@@ -16,8 +16,8 @@ layout (std140) uniform Transform {
 
 void main()
 {
-    gl_Position = projection * view * model * vec4(inPosition, 1.0f);
-    fragPosition = vec3(model * vec4(inPosition, 1.0f));
+    gl_Position = projection * view * model * vec4(inPosition, 1.0);
+    fragPosition = vec3(model * vec4(inPosition, 1.0));
     normal = normalize(vec3(projection * vec4(mat3(transpose(inverse(view * model))) * inNormal, 1.0)));
     texCoords = inTexCoords;
 }
